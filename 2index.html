@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMI Management System - Final Rebuild</title>
+    
+    <script type="application/json" id="pwa-manifest">
+    {
+      "name": "EMI Management System",
+      "short_name": "EMI Manager",
+      "start_url": ".",
+      "display": "standalone",
+      "background_color": "#f8fafc",
+      "theme_color": "#2563eb",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'><rect width='192' height='192' fill='%232563eb'/><text x='50%' y='50%' font-family='sans-serif' font-size='48' text-anchor='middle' dy='.3em' fill='%23fff'>EMI</text></svg>",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+    </script>
+
+    <style>
+        /* =========================================================
+           CSS STYLES
+           ========================================================= */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --sidebar: #1e293b;
+            --sidebar-hover: #334155;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #eab308;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); height: 100vh; overflow: hidden; }
+
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mt-4 { margin-top: 1rem; }
+        .p-4 { padding: 1rem; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-primary { color: var(--primary); }
+        .font-bold { font-weight: bold; }
+
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: 0.2s; color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem;}
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+        .btn-primary { background: var(--primary); }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-secondary { background: var(--text-muted); }
+        .btn-secondary:hover { background: #475569; }
+        .btn-block { width: 100%; display: flex; }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; font-size: 1rem; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        .login-view { height: 100vh; display: flex; justify-content: center; align-items: center; background: #cbd5e1; }
+        .login-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+
+        .app-layout { display: flex; height: 100vh; }
+        .sidebar { width: 250px; background: var(--sidebar); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid #334155; }
+        .sidebar-nav { padding: 1rem 0; flex: 1; }
+        .nav-item { padding: 0.75rem 1.5rem; color: #cbd5e1; text-decoration: none; display: block; cursor: pointer; border-left: 4px solid transparent; }
+        .nav-item:hover, .nav-item.active { background: var(--sidebar-hover); color: white; border-left-color: var(--primary); }
+        .sidebar-footer { padding: 1rem; border-top: 1px solid #334155; }
+
+        .main-content { flex: 1; overflow-y: auto; padding: 2rem; background: #f1f5f9; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        
+        .card { background: var(--card-bg); padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+        
+        .stats-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { border-left: 4px solid var(--primary); padding: 1.5rem; background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .stat-value { font-size: 1.8rem; font-weight: bold; margin-top: 0.5rem; }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.95rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #f8fafc; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
+        tr:hover { background-color: #f8fafc; }
+        
+        .badge { padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+        .bg-pending { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+        .bg-paid { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+        .bg-partial { background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; }
+        .bg-overdue { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+        .bg-scheduled { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+        .dashboard-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 900px) { .dashboard-lists { grid-template-columns: 1fr; } }
+
+        .receipt-box { border: 2px dashed #ccc; padding: 2rem; max-width: 600px; margin: 0 auto; background: white; }
+        .receipt-header { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 1.1rem; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #receiptView, #receiptView * { visibility: visible; }
+            #receiptView { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+            .sidebar, .page-header, .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loginView" class="login-view">
+        <div class="login-card">
+            <h2 class="text-center mb-4 text-primary">EMI Manager</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginEmail" required value="NEWASHISHMOBILE">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required value="Ashish@12">
+                </div>
+                <p id="loginError" class="text-danger hidden mb-4 text-center">Invalid credentials</p>
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="mainApp" class="app-layout hidden">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>EMI Manager</h2>
+                <small id="userRoleDisplay" class="text-muted"></small>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-target="dashboardView">Dashboard</div>
+                <div class="nav-item" data-target="customersView">Customers</div>
+                <div class="nav-item" data-target="loansView">Loans</div>
+                <div class="nav-item" data-target="collectionView">Collect EMI</div>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn btn-danger btn-block">Logout</button>
+                <button id="backupBtn" class="btn btn-secondary btn-block" style="margin-top: 0.5rem;">Backup Data</button>
+                <input type="file" id="restoreFile" accept=".json" class="hidden">
+                <button id="restoreBtn" class="btn btn-secondary btn-block" style="margin-top: 0.5rem;">Restore Data</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <section id="dashboardView" class="page">
+                <div class="page-header">
+                    <h2>Dashboard</h2>
+                </div>
+                <div class="stats-grid grid">
+                    <div class="stat-card">
+                        <div class="text-muted">Today's Collection</div>
+                        <div class="stat-value text-success" id="dashToday">₹0</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--warning)">
+                        <div class="text-muted">Total Outstanding</div>
+                        <div class="stat-value" id="dashOutstanding">₹0</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--danger)">
+                        <div class="text-muted">Overdue EMIs</div>
+                        <div class="stat-value text-danger" id="dashOverdueCount">0</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--primary)">
+                        <div class="text-muted">Total Due (All Loans)</div>
+                        <div class="stat-value text-primary" id="dashTotalDue">₹0</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-lists">
+                    <div class="card">
+                        <h3 class="mb-4 text-primary">Upcoming EMIs (Next 7 Days)</h3>
+                        <div class="table-wrapper">
+                            <table id="upcomingTable">
+                                <thead><tr><th>Name</th><th>Loan</th><th>Due Date</th><th>Amt</th><th>Action</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="mb-4 text-success">Recent Collections</h3>
+                        <div class="table-wrapper">
+                            <table id="recentTable">
+                                <thead><tr><th>Date</th><th>Rcpt No</th><th>Amount</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="customersView" class="page hidden">
+                <div class="page-header">
+                    <h2>Customers</h2>
+                </div>
+                <div class="card mb-4">
+                    <h3>Add New Customer</h3>
+                    <form id="customerForm" class="form-grid mt-4">
+                        <div class="form-group"><label>Name</label><input type="text" id="custName" required></div>
+                        <div class="form-group"><label>Phone</label><input type="text" id="custPhone" required></div>
+                        <div class="form-group"><label>Address</label><input type="text" id="custAddress" required></div>
+                        <div class="form-group"><label>Finance Company</label><input type="text" id="custFinance" required></div>
+                        <button type="submit" class="btn btn-primary" style="grid-column: span 2;">Save Customer</button>
+                    </form>
+                </div>
+                <div class="card table-wrapper">
+                    <h3>Customer List</h3>
+                    <table id="customerTable">
+                        <thead><tr><th>Name</th><th>Phone</th><th>Finance Company</th><th>Address</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="loansView" class="page hidden">
+                <div class="page-header">
+                    <h2>Loans Management</h2>
+                </div>
+                
+                <div id="loanHistoryPanel" class="card hidden">
+                    <div class="flex" style="justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 class="text-primary">EMI History</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="modules.loans.hideHistory()">Back to Loans</button>
+                    </div>
+                    <p id="historySubtitle" class="mb-4 text-muted font-bold"></p>
+                    <div class="table-wrapper">
+                        <table id="historyTable">
+                            <thead><tr><th>No.</th><th>Due Date</th><th>Amount</th><th>Status</th><th>Source</th><th>Paid On</th><th>Receipt No</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="loansMainPanel">
+                    <div class="card mb-4 admin-only">
+                        <h3>Create New Loan</h3>
+                        <form id="loanForm" class="form-grid mt-4">
+                            <div class="form-group">
+                                <label>Select Customer</label>
+                                <input type="text" id="loanCustomerSearch" placeholder="Search by Name or Phone..." style="margin-bottom: 0.5rem;" oninput="modules.loans.filterCustomers(this.value)">
+                                <select id="loanCustomer" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Loan Number (Manual & Unique)</label>
+                                <input type="text" id="loanNoInput" placeholder="e.g. L-1001" required>
+                            </div>
+                            <div class="form-group"><label>Product Name</label><input type="text" id="loanProduct" required></div>
+                            <div class="form-group"><label>Total Amount (₹)</label><input type="number" id="loanTotal" required></div>
+                            <div class="form-group"><label>EMI Amount (₹)</label><input type="number" id="loanEmi" required></div>
+                            <div class="form-group"><label>Total Months</label><input type="number" id="loanMonths" required></div>
+                            <div class="form-group"><label>First EMI Date</label><input type="date" id="loanDate" required></div>
+                            <div class="form-group"><label>Final Submission Date (Shop Deadline)</label><input type="date" id="loanShopDate" required></div>
+                            <button type="submit" class="btn btn-primary" style="grid-column: span 2;">Generate Loan & Schedule</button>
+                        </form>
+                    </div>
+                    <div class="card table-wrapper">
+                        <h3>Active Loans</h3>
+                        <table id="loanTable">
+                            <thead><tr><th>Loan No</th><th>Customer</th><th>Total</th><th>Next EMI Date</th><th>Amt</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="collectionView" class="page hidden">
+                <div class="page-header">
+                    <h2>Collect EMI</h2>
+                </div>
+                <div class="card mb-4">
+                    <div class="form-group">
+                        <label>Search Customer by Name, Phone or Loan No</label>
+                        <div class="flex" style="gap: 1rem;">
+                            <input type="text" id="searchQuery" placeholder="Enter Name, Phone or Loan No" style="flex:1;">
+                            <button id="searchBtn" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="paymentPanel" class="card hidden">
+                    <h3 id="payTitle" class="mb-4 text-primary"></h3>
+                    
+                    <div id="upcomingEmiAlert" class="mb-4 p-4 hidden" style="background: #fff7ed; border-left: 4px solid orange;">
+                        <strong>Next EMI:</strong> <span id="alertDate"></span> | 
+                        <strong>Amount:</strong> <span id="alertAmount"></span> |
+                        <span id="alertStatus" class="badge"></span>
+                    </div>
+
+                    <div class="table-wrapper mb-4">
+                        <table id="pendingEmiTable">
+                            <thead><tr><th>No.</th><th>Due Date</th><th>Due Amount</th><th>Status</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <form id="paymentForm" class="form-grid">
+                        <input type="hidden" id="payLoanId">
+                        <div class="form-group"><label>Amount Received (₹)</label><input type="number" id="payAmount" required></div>
+                        <div class="form-group">
+                            <label>Payment Mode</label>
+                            <select id="payMode"><option>Cash</option><option>UPI</option></select>
+                        </div>
+                        <button type="submit" class="btn btn-success" style="grid-column: span 2;">Confirm Payment</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="receiptView" class="page hidden">
+                <div class="receipt-box mt-4">
+                    <div class="receipt-header">
+                        <h2>NEW ASHISH MOBILE GALLERY</h2>
+                        <p class="text-muted">Official Payment Receipt</p>
+                    </div>
+                    <div class="receipt-row"><span>Receipt No:</span><strong id="rctNo"></strong></div>
+                    <div class="receipt-row"><span>Date:</span><strong id="rctDate"></strong></div>
+                    <div class="receipt-row"><span>Customer:</span><strong id="rctName"></strong></div>
+                    <div class="receipt-row"><span>Loan No:</span><strong id="rctLoan"></strong></div>
+                    <hr class="mb-4 mt-4" style="border: 0; border-top: 1px dashed #ccc;">
+                    <div class="receipt-row"><span>Amount Paid:</span><strong class="text-success" style="font-size: 1.5rem;">₹<span id="rctAmount"></span></strong></div>
+                    <div class="receipt-row"><span>Payment Source:</span><strong id="rctSource"></strong></div>
+                    <div class="receipt-row"><span>Mode:</span><strong id="rctMode"></strong></div>
+                    
+                    <div class="mt-4 pt-4 text-center no-print">
+                        <button onclick="window.print()" class="btn btn-primary">Print Receipt</button>
+                        <button onclick="app.router.navigate('collectionView')" class="btn btn-secondary" style="background:var(--sidebar); margin-left:1rem;">Collect Another</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // FINAL REBUILD FIX: PWA Initialization
+        (function initPWA() {
+            // Inject Manifest
+            const manifestContent = document.getElementById('pwa-manifest').textContent;
+            const manifestBlob = new Blob([manifestContent], { type: 'application/json' });
+            const manifestUrl = URL.createObjectURL(manifestBlob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = manifestUrl;
+            document.head.appendChild(link);
+
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', (e) => self.skipWaiting());
+                    self.addEventListener('activate', (e) => self.clients.claim());
+                    self.addEventListener('fetch', (e) => {
+                        // Pass-through fetch for PWA installability requirements
+                        e.respondWith(fetch(e.request).catch(() => new Response('Offline.')));
+                    });
+                `;
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(swBlob);
+                try {
+                    navigator.serviceWorker.register(swUrl).catch(() => {});
+                } catch(e) {}
+            }
+        })();
+
+        // --- 1. DATA LAYER (localStorage Database) ---
+        const db = {
+            init: () => {
+                // FINAL REBUILD FIX: Exact credentials, clear previous ones to avoid conflict
+                let users = JSON.parse(localStorage.getItem('users')) || [];
+                const exactAdminExists = users.some(u => u.email === 'NEWASHISHMOBILE' && u.password === 'Ashish@12');
+                if (!exactAdminExists) {
+                    localStorage.setItem('users', JSON.stringify([{ id: '1', email: 'NEWASHISHMOBILE', password: 'Ashish@12', role: 'Admin', name: 'Owner' }]));
+                    sessionStorage.removeItem('session'); // Force re-login if credentials were out of date
+                }
+
+                ['customers', 'loans', 'emis', 'payments'].forEach(key => {
+                    if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify([]));
+                });
+            },
+            get: (table) => JSON.parse(localStorage.getItem(table)) || [],
+            set: (table, data) => localStorage.setItem(table, JSON.stringify(data)),
+            insert: (table, record) => {
+                const data = db.get(table);
+                record.id = Date.now().toString(36) + Math.random().toString(36).substr(2);
+                record.createdAt = new Date().toISOString();
+                data.push(record);
+                db.set(table, data);
+                return record;
+            },
+            update: (table, id, updates) => {
+                const data = db.get(table);
+                const idx = data.findIndex(item => item.id === id);
+                if (idx > -1) {
+                    data[idx] = { ...data[idx], ...updates };
+                    db.set(table, data);
+                }
+            },
+            delete: (table, id) => {
+                const data = db.get(table);
+                const newData = data.filter(item => item.id !== id);
+                db.set(table, newData);
+            }
+        };
+
+        // --- 2. APP STATE ---
+        const app = {
+            currentUser: null,
+            init: () => {
+                db.init();
+                const session = sessionStorage.getItem('session');
+                if (session) {
+                    app.currentUser = JSON.parse(session);
+                    app.router.showMainApp();
+                }
+                app.bindEvents();
+            },
+            router: {
+                navigate: (viewId) => {
+                    document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+                    document.getElementById(viewId).classList.remove('hidden');
+                    
+                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                    const navItem = document.querySelector(`.nav-item[data-target="${viewId}"]`);
+                    if(navItem) navItem.classList.add('active');
+
+                    if (viewId === 'dashboardView') modules.dashboard.render();
+                    if (viewId === 'customersView') modules.customers.render();
+                    if (viewId === 'loansView') {
+                        document.getElementById('loansMainPanel').classList.remove('hidden');
+                        document.getElementById('loanHistoryPanel').classList.add('hidden');
+                        modules.loans.render();
+                    }
+                },
+                showMainApp: () => {
+                    document.getElementById('loginView').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    document.getElementById('userRoleDisplay').innerText = `Role: ${app.currentUser.role}`;
+                    if(app.currentUser.role !== 'Admin'){
+                        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+                    }
+                    app.router.navigate('dashboardView');
+                },
+                logout: () => {
+                    sessionStorage.removeItem('session');
+                    location.reload();
+                }
+            },
+            bindEvents: () => {
+                document.getElementById('loginForm').addEventListener('submit', modules.auth.login);
+                document.getElementById('logoutBtn').addEventListener('click', app.router.logout);
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => app.router.navigate(e.target.dataset.target));
+                });
+                document.getElementById('customerForm').addEventListener('submit', modules.customers.add);
+                document.getElementById('loanForm').addEventListener('submit', modules.loans.add);
+                document.getElementById('searchBtn').addEventListener('click', modules.collection.search);
+                document.getElementById('paymentForm').addEventListener('submit', modules.collection.pay);
+
+                document.getElementById('backupBtn').addEventListener('click', modules.dataBackup.exportData);
+                document.getElementById('restoreBtn').addEventListener('click', () => document.getElementById('restoreFile').click());
+                document.getElementById('restoreFile').addEventListener('change', modules.dataBackup.importData);
+            }
+        };
+
+        const utils = {
+            formatMoney: (amt) => `₹${parseFloat(amt).toFixed(2)}`,
+            formatDate: (dateStr) => new Date(dateStr).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-'),
+            checkOverdue: (dateStr) => {
+                let due = new Date(dateStr);
+                due.setHours(0,0,0,0);
+                let today = new Date();
+                today.setHours(0,0,0,0);
+                return due < today;
+            }
+        };
+
+        // --- 3. MODULES ---
+        const modules = {
+            dataBackup: {
+                exportData: () => {
+                    const data = {
+                        users: db.get('users'),
+                        customers: db.get('customers'),
+                        loans: db.get('loans'),
+                        emis: db.get('emis'),
+                        payments: db.get('payments')
+                    };
+                    const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `EMI_Backup_${new Date().toISOString().slice(0,10)}.json`;
+                    a.click();
+                },
+                importData: (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    if(!confirm("WARNING: Overwrite ALL current data with backup file?")) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            if (data.users && data.customers && data.loans && data.emis && data.payments) {
+                                localStorage.setItem('users', JSON.stringify(data.users));
+                                localStorage.setItem('customers', JSON.stringify(data.customers));
+                                localStorage.setItem('loans', JSON.stringify(data.loans));
+                                localStorage.setItem('emis', JSON.stringify(data.emis));
+                                localStorage.setItem('payments', JSON.stringify(data.payments));
+                                alert('Data restored successfully! App will reload.');
+                                location.reload();
+                            } else {
+                                alert('Invalid backup file format.');
+                            }
+                        } catch (err) {
+                            alert('Error parsing backup file.');
+                        }
+                    };
+                    reader.readAsText(file);
+                    e.target.value = ''; 
+                }
+            },
+
+            auth: {
+                login: (e) => {
+                    e.preventDefault();
+                    const em = document.getElementById('loginEmail').value;
+                    const pw = document.getElementById('loginPassword').value;
+                    const users = db.get('users');
+                    const user = users.find(u => u.email === em && u.password === pw);
+                    if (user) {
+                        sessionStorage.setItem('session', JSON.stringify(user));
+                        app.currentUser = user;
+                        app.router.showMainApp();
+                    } else {
+                        document.getElementById('loginError').classList.remove('hidden');
+                    }
+                }
+            },
+            
+            dashboard: {
+                render: () => {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const emis = db.get('emis');
+                    const payments = db.get('payments');
+                    const customers = db.get('customers');
+                    const loans = db.get('loans');
+
+                    let todayColl = payments.filter(p => p.createdAt.startsWith(todayStr))
+                                            .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                    
+                    let outstanding = 0, overdue = 0, totalDue = 0;
+                    let today = new Date(); today.setHours(0,0,0,0);
+                    let nextWeek = new Date(today); nextWeek.setDate(nextWeek.getDate() + 7);
+
+                    const upcomingList = [];
+
+                    emis.forEach(emi => {
+                        // FINAL REBUILD FIX: EMI Status Normalization
+                        if (emi.status !== 'Paid') {
+                            const dueAmt = parseFloat(emi.amount) - parseFloat(emi.paid || 0);
+                            outstanding += dueAmt;
+                            totalDue += dueAmt; 
+
+                            let due = new Date(emi.dueDate);
+                            due.setHours(0,0,0,0);
+                            
+                            if (due >= today && due <= nextWeek) {
+                                let loan = loans.find(l => l.id === emi.loanId);
+                                let cust = loan ? customers.find(c => c.id === loan.customerId) : null;
+                                if(loan && cust) {
+                                    upcomingList.push({ name: cust.name, loanNo: loan.loanNo, date: emi.dueDate, amount: dueAmt });
+                                }
+                            }
+
+                            if (due < today) {
+                                overdue++;
+                                if(emi.status !== 'Overdue' && emi.status !== 'Partially Paid') {
+                                    db.update('emis', emi.id, {status: 'Overdue'});
+                                }
+                            }
+                        }
+                    });
+
+                    document.getElementById('dashToday').innerText = utils.formatMoney(todayColl);
+                    document.getElementById('dashOutstanding').innerText = utils.formatMoney(outstanding);
+                    document.getElementById('dashOverdueCount').innerText = overdue;
+                    document.getElementById('dashTotalDue').innerText = utils.formatMoney(totalDue);
+
+                    const upTable = document.querySelector('#upcomingTable tbody');
+                    upTable.innerHTML = upcomingList.length ? upcomingList.map(u => 
+                        `<tr>
+                            <td>${u.name}</td>
+                            <td>${u.loanNo}</td>
+                            <td>${utils.formatDate(u.date)}</td>
+                            <td>${utils.formatMoney(u.amount)}</td>
+                            <td><button class="btn btn-sm btn-primary" onclick="modules.collection.directPay('${u.loanNo}')">Pay</button></td>
+                        </tr>`
+                    ).join('') : '<tr><td colspan="5" class="text-center">No upcoming EMIs</td></tr>';
+
+                    const recentTable = document.querySelector('#recentTable tbody');
+                    const sortedPayments = [...payments].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+                    recentTable.innerHTML = sortedPayments.map(p => 
+                        `<tr><td>${utils.formatDate(p.createdAt)}</td><td>${p.receiptNo}</td><td class="text-success font-bold">${utils.formatMoney(p.amount)}</td></tr>`
+                    ).join('');
+                }
+            },
+
+            customers: {
+                render: () => {
+                    const tbody = document.querySelector('#customerTable tbody');
+                    tbody.innerHTML = db.get('customers').map(c => 
+                        `<tr>
+                            <td>${c.name}</td><td>${c.phone}</td><td>${c.financeCompany || c.idProof || 'N/A'}</td><td>${c.address}</td>
+                            <td><button class="btn btn-sm btn-danger" onclick="modules.customers.delete('${c.id}')">Delete</button></td>
+                        </tr>`
+                    ).join('');
+                },
+                add: (e) => {
+                    e.preventDefault();
+                    db.insert('customers', {
+                        name: document.getElementById('custName').value,
+                        phone: document.getElementById('custPhone').value,
+                        address: document.getElementById('custAddress').value,
+                        financeCompany: document.getElementById('custFinance').value
+                    });
+                    e.target.reset();
+                    modules.customers.render();
+                    alert('Customer Added!');
+                },
+                delete: (id) => {
+                    if(!confirm("WARNING: Deleting this customer will delete ALL their Loans, EMIs, and Payments. This cannot be undone. Continue?")) return;
+                    
+                    const loans = db.get('loans').filter(l => l.customerId === id);
+                    const loanIds = loans.map(l => l.id);
+
+                    let emis = db.get('emis').filter(e => !loanIds.includes(e.loanId));
+                    let payments = db.get('payments').filter(p => !loanIds.includes(p.loanId));
+                    db.set('emis', emis);
+                    db.set('payments', payments);
+
+                    let newLoans = db.get('loans').filter(l => l.customerId !== id);
+                    db.set('loans', newLoans);
+                    db.delete('customers', id);
+
+                    modules.customers.render();
+                    alert('Customer and all related data deleted.');
+                }
+            },
+
+            loans: {
+                filterCustomers: (query) => {
+                    const q = query.toLowerCase();
+                    const select = document.getElementById('loanCustomer');
+                    const customers = db.get('customers').filter(c => 
+                        c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q)
+                    );
+                    select.innerHTML = customers.map(c => `<option value="${c.id}">${c.name} (${c.phone})</option>`).join('');
+                },
+                render: () => {
+                    modules.loans.filterCustomers('');
+                    document.getElementById('loanCustomerSearch').value = '';
+                    
+                    const customers = db.get('customers');
+                    const emis = db.get('emis');
+                    const tbody = document.querySelector('#loanTable tbody');
+                    
+                    tbody.innerHTML = db.get('loans').map(l => {
+                        let c = customers.find(x => x.id === l.customerId);
+                        
+                        let nextEmi = emis.filter(e => e.loanId === l.id && e.status !== 'Paid')
+                                          .sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
+                        
+                        let nextDate = nextEmi ? utils.formatDate(nextEmi.dueDate) : 'Completed';
+                        let nextAmt = nextEmi ? utils.formatMoney(nextEmi.amount) : '-';
+                        let statusBadge = nextEmi ? (utils.checkOverdue(nextEmi.dueDate) ? 'bg-overdue' : 'bg-pending') : 'bg-paid';
+                        let statusText = nextEmi ? (utils.checkOverdue(nextEmi.dueDate) ? 'Overdue' : 'Pending') : 'Paid';
+
+                        return `<tr>
+                            <td>${l.loanNo}</td>
+                            <td>${c ? c.name : 'N/A'}</td>
+                            <td>${utils.formatMoney(l.total)}</td>
+                            <td>${nextDate}</td>
+                            <td>${nextAmt}</td>
+                            <td><span class="badge ${statusBadge}">${statusText}</span></td>
+                            <td>
+                                <div class="flex" style="gap: 0.5rem;">
+                                    <button class="btn btn-sm btn-success" onclick="modules.loans.showHistory('${l.id}')">EMIs</button>
+                                    <button class="btn btn-sm btn-danger" onclick="modules.loans.delete('${l.id}')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    }).join('');
+                },
+                add: (e) => {
+                    e.preventDefault();
+                    const loanNo = document.getElementById('loanNoInput').value.trim();
+                    if(db.get('loans').some(l => l.loanNo === loanNo)) return alert('Error: Loan Number already exists!');
+
+                    const months = parseInt(document.getElementById('loanMonths').value);
+                    const emiAmt = parseFloat(document.getElementById('loanEmi').value);
+                    const startDate = new Date(document.getElementById('loanDate').value);
+                    const shopDeadline = document.getElementById('loanShopDate').value;
+
+                    const loan = db.insert('loans', {
+                        loanNo: loanNo,
+                        customerId: document.getElementById('loanCustomer').value,
+                        product: document.getElementById('loanProduct').value,
+                        total: parseFloat(document.getElementById('loanTotal').value),
+                        shopDeadline: shopDeadline, 
+                        status: 'Active'
+                    });
+
+                    for (let i = 1; i <= months; i++) {
+                        let nextDate = new Date(startDate.getFullYear(), startDate.getMonth() + i - 1, startDate.getDate());
+                        db.insert('emis', {
+                            loanId: loan.id,
+                            instNo: i,
+                            dueDate: nextDate.toISOString().split('T')[0],
+                            amount: emiAmt,
+                            paid: 0,
+                            status: 'Pending',
+                            paymentSource: 'SHOP' // Default Source
+                        });
+                    }
+                    
+                    e.target.reset();
+                    modules.loans.render();
+                    alert('Loan Created Successfully!');
+                },
+                delete: (id) => {
+                    if(!confirm("Delete this Loan? All related EMI schedule and Payment history will be deleted.")) return;
+                    
+                    let emis = db.get('emis').filter(e => e.loanId !== id);
+                    let payments = db.get('payments').filter(p => p.loanId !== id);
+                    db.set('emis', emis);
+                    db.set('payments', payments);
+                    
+                    db.delete('loans', id);
+                    modules.loans.render();
+                },
+                showHistory: (loanId) => {
+                    document.getElementById('loansMainPanel').classList.add('hidden');
+                    const historyPanel = document.getElementById('loanHistoryPanel');
+                    
+                    const loan = db.get('loans').find(l => l.id === loanId);
+                    const cust = db.get('customers').find(c => c.id === loan.customerId);
+                    
+                    document.getElementById('historySubtitle').innerText = `Customer: ${cust.name} | Mobile: ${cust.phone} | Loan No: ${loan.loanNo}`;
+                    
+                    const allEmis = db.get('emis').filter(e => e.loanId === loanId);
+                    allEmis.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+                    const tbody = document.querySelector('#historyTable tbody');
+                    tbody.innerHTML = allEmis.map(e => {
+                        let badge = 'bg-pending';
+                        if(e.status === 'Paid') badge = 'bg-paid';
+                        else if(e.status === 'Partially Paid') badge = 'bg-partial';
+                        else if(e.status === 'Overdue' || utils.checkOverdue(e.dueDate)) badge = 'bg-overdue';
+                        else badge = 'bg-scheduled'; 
+                        
+                        let submissionDate = e.paidDate ? utils.formatDate(e.paidDate) : '-';
+                        let sourceIcon = e.paymentSource === 'ACCOUNT' ? '🏦 ACCOUNT' : '🏪 SHOP';
+
+                        return `<tr>
+                            <td>${e.instNo}</td>
+                            <td>${utils.formatDate(e.dueDate)}</td>
+                            <td>${utils.formatMoney(e.amount)}</td>
+                            <td><span class="badge ${badge}">${e.status}</span></td>
+                            <td class="text-muted" style="font-size: 0.8rem;">${sourceIcon}</td>
+                            <td class="text-muted font-bold">${submissionDate}</td>
+                            <td class="text-muted">${e.receiptNo || '-'}</td>
+                        </tr>`;
+                    }).join('');
+                    
+                    historyPanel.classList.remove('hidden');
+                },
+                hideHistory: () => {
+                    document.getElementById('loanHistoryPanel').classList.add('hidden');
+                    document.getElementById('loansMainPanel').classList.remove('hidden');
+                }
+            },
+
+            collection: {
+                toggleSource: (e, id) => {
+                    e.preventDefault();
+                    const emis = db.get('emis');
+                    const emi = emis.find(x => x.id === id);
+                    if(emi) {
+                        emi.paymentSource = emi.paymentSource === 'ACCOUNT' ? 'SHOP' : 'ACCOUNT';
+                        db.update('emis', id, { paymentSource: emi.paymentSource });
+                        const btn = document.getElementById('emi-source-btn-' + id);
+                        if(btn) {
+                            btn.className = `btn btn-sm ${emi.paymentSource === 'ACCOUNT' ? 'btn-primary' : 'btn-secondary'}`;
+                            btn.innerHTML = emi.paymentSource === 'ACCOUNT' ? '🏦 ACCOUNT' : '🏪 SHOP';
+                        }
+                    }
+                },
+                directPay: (loanNo) => {
+                    app.router.navigate('collectionView');
+                    document.getElementById('searchQuery').value = loanNo;
+                    modules.collection.search();
+                },
+                search: () => {
+                    const query = document.getElementById('searchQuery').value.trim().toLowerCase();
+                    const customers = db.get('customers');
+                    const loans = db.get('loans');
+                    
+                    let targetLoan = loans.find(l => l.loanNo.toLowerCase() === query);
+                    let targetCust = null;
+
+                    if (!targetLoan) {
+                        targetCust = customers.find(c => c.phone.toLowerCase() === query || c.name.toLowerCase().includes(query));
+                        if (targetCust) targetLoan = loans.find(l => l.customerId === targetCust.id && l.status === 'Active');
+                    } else {
+                        targetCust = customers.find(c => c.id === targetLoan.customerId);
+                    }
+
+                    if (!targetLoan || !targetCust) return alert('Active loan not found. Check Name, Phone, or Loan No.');
+
+                    document.getElementById('payTitle').innerText = `${targetCust.name} - ${targetLoan.loanNo} (${targetLoan.product})`;
+                    document.getElementById('payLoanId').value = targetLoan.id;
+                    
+                    const allEmis = db.get('emis').filter(e => e.loanId === targetLoan.id);
+                    allEmis.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+                    const tbody = document.querySelector('#pendingEmiTable tbody');
+                    let totalDue = 0;
+                    let foundPending = false;
+
+                    tbody.innerHTML = allEmis.map(e => {
+                        let bal = e.amount - (e.paid || 0);
+                        let badge = 'bg-pending';
+                        let statusText = e.status;
+                        let receiptText = e.receiptNo ? ` (${e.receiptNo})` : '';
+
+                        if(e.status === 'Paid') {
+                            badge = 'bg-paid';
+                            statusText = 'Paid';
+                        } else if(e.status === 'Partially Paid') {
+                            badge = 'bg-partial';
+                            statusText = 'Partially Paid';
+                            totalDue += bal;
+                        } else {
+                            if (utils.checkOverdue(e.dueDate)) {
+                                badge = 'bg-overdue';
+                                statusText = 'Overdue';
+                                totalDue += bal;
+                                if (e.status !== 'Overdue') db.update('emis', e.id, {status: 'Overdue'});
+                            } else if (!foundPending) {
+                                badge = 'bg-pending';
+                                statusText = 'Pending';
+                                foundPending = true;
+                                totalDue += bal;
+                                if (e.status !== 'Pending') db.update('emis', e.id, {status: 'Pending'});
+                            } else {
+                                badge = 'bg-scheduled';
+                                statusText = 'Scheduled';
+                                if (e.status !== 'Scheduled') db.update('emis', e.id, {status: 'Scheduled'});
+                            }
+                        }
+
+                        let subDateInfo = e.paidDate ? `<div style="font-size:0.75rem; margin-top:0.2rem;" class="text-muted">Paid on: ${utils.formatDate(e.paidDate)}</div>` : '';
+
+                        let source = e.paymentSource === 'ACCOUNT' ? 'ACCOUNT' : 'SHOP';
+                        let sourceIcon = source === 'ACCOUNT' ? '🏦 ACCOUNT' : '🏪 SHOP';
+                        let sourceBtnClass = source === 'ACCOUNT' ? 'btn-primary' : 'btn-secondary';
+                        let sourceToggle = `<button type="button" id="emi-source-btn-${e.id}" class="btn btn-sm ${sourceBtnClass}" onclick="modules.collection.toggleSource(event, '${e.id}')" style="margin-left: 0.5rem; padding: 0.1rem 0.4rem; font-size: 0.7rem;">${sourceIcon}</button>`;
+
+                        return `<tr id="emi-row-${e.id}">
+                            <td>${e.instNo}</td>
+                            <td>${utils.formatDate(e.dueDate)}</td>
+                            <td id="emi-bal-${e.id}">${utils.formatMoney(bal)}</td>
+                            <td id="emi-status-${e.id}"><span class="badge ${badge}">${statusText}${receiptText}</span> ${sourceToggle} ${subDateInfo}</td>
+                        </tr>`;
+                    }).join('');
+
+                    const unpaidEmis = allEmis.filter(e => e.status !== 'Paid');
+                    const alertBox = document.getElementById('upcomingEmiAlert');
+                    if (unpaidEmis.length > 0) {
+                        const next = unpaidEmis[0];
+                        const isOverdue = utils.checkOverdue(next.dueDate);
+                        document.getElementById('alertDate').innerText = utils.formatDate(next.dueDate);
+                        document.getElementById('alertAmount').innerText = utils.formatMoney(next.amount - (next.paid || 0));
+                        const badgeEl = document.getElementById('alertStatus');
+                        badgeEl.innerText = isOverdue ? 'OVERDUE' : 'PENDING';
+                        badgeEl.className = `badge ${isOverdue ? 'bg-overdue' : 'bg-pending'}`;
+                        alertBox.classList.remove('hidden');
+                    } else {
+                        alertBox.classList.add('hidden');
+                    }
+
+                    document.getElementById('payAmount').value = totalDue > 0 ? totalDue : 0;
+                    document.getElementById('paymentPanel').classList.remove('hidden');
+                },
+
+                pay: (e) => {
+                    e.preventDefault();
+                    let amountToPay = parseFloat(document.getElementById('payAmount').value);
+                    const originalAmount = amountToPay;
+                    const mode = document.getElementById('payMode').value;
+                    const loanId = document.getElementById('payLoanId').value;
+                    
+                    if (amountToPay <= 0) return alert('Invalid amount');
+
+                    const emis = db.get('emis').filter(e => e.loanId === loanId && e.status !== 'Paid');
+                    
+                    // FINAL REBUILD FIX: Payment Guard
+                    if (emis.length === 0) {
+                        return alert('No pending EMI available for this loan');
+                    }
+
+                    // FINAL REBUILD FIX: Unique Receipt Number
+                    const datePart = new Date().toISOString().slice(0,10).replace(/-/g, '');
+                    const randomPart = Math.random().toString(36).substr(2, 6).toUpperCase();
+                    const receiptNo = `RCPT-${datePart}-${randomPart}`;
+                    
+                    db.insert('payments', { receiptNo, loanId, amount: originalAmount, mode });
+
+                    emis.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+                    const currentDateTime = new Date().toISOString();
+
+                    for (let emi of emis) {
+                        if (amountToPay <= 0) break;
+                        let paidSoFar = emi.paid || 0;
+                        let balanceDue = emi.amount - paidSoFar;
+                        
+                        let paidSourceIcon = emi.paymentSource === 'ACCOUNT' ? '🏦 ACCOUNT' : '🏪 SHOP';
+
+                        if (amountToPay >= balanceDue) {
+                            db.update('emis', emi.id, { paid: emi.amount, status: 'Paid', receiptNo: receiptNo, paidDate: currentDateTime });
+                            amountToPay -= balanceDue;
+
+                            const statusTd = document.getElementById('emi-status-' + emi.id);
+                            const balTd = document.getElementById('emi-bal-' + emi.id);
+                            if(statusTd) statusTd.innerHTML = `<span class="badge bg-paid">Paid (${receiptNo})</span> <span style="font-size: 0.75rem; margin-left: 0.3rem;" class="text-muted">${paidSourceIcon}</span><div style="font-size:0.75rem; margin-top:0.2rem;" class="text-muted">Paid on: ${utils.formatDate(currentDateTime)}</div>`;
+                            if(balTd) balTd.innerText = utils.formatMoney(0);
+                        } else {
+                            db.update('emis', emi.id, { paid: paidSoFar + amountToPay, status: 'Partially Paid', receiptNo: receiptNo, paidDate: currentDateTime });
+                            
+                            const statusTd = document.getElementById('emi-status-' + emi.id);
+                            const balTd = document.getElementById('emi-bal-' + emi.id);
+                            if(statusTd) statusTd.innerHTML = `<span class="badge bg-partial">Partially Paid (${receiptNo})</span> <span style="font-size: 0.75rem; margin-left: 0.3rem;" class="text-muted">${paidSourceIcon}</span><div style="font-size:0.75rem; margin-top:0.2rem;" class="text-muted">Paid on: ${utils.formatDate(currentDateTime)}</div>`;
+                            if(balTd) balTd.innerText = utils.formatMoney(balanceDue - amountToPay);
+
+                            amountToPay = 0;
+                        }
+                    }
+
+                    const unpaidEmis = db.get('emis').filter(e => e.loanId === loanId && e.status !== 'Paid');
+                    unpaidEmis.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+                    const alertBox = document.getElementById('upcomingEmiAlert');
+                    if (unpaidEmis.length > 0) {
+                        const next = unpaidEmis[0];
+                        const isOverdue = utils.checkOverdue(next.dueDate);
+                        document.getElementById('alertDate').innerText = utils.formatDate(next.dueDate);
+                        document.getElementById('alertAmount').innerText = utils.formatMoney(next.amount - (next.paid || 0));
+                        const badgeEl = document.getElementById('alertStatus');
+                        badgeEl.innerText = isOverdue ? 'OVERDUE' : 'PENDING';
+                        badgeEl.className = `badge ${isOverdue ? 'bg-overdue' : 'bg-pending'}`;
+                    } else {
+                        alertBox.classList.add('hidden');
+                    }
+
+                    let receiptSource = emis.length > 0 && emis[0].paymentSource === 'ACCOUNT' ? '🏦 ACCOUNT' : '🏪 SHOP';
+
+                    const targetLoan = db.get('loans').find(l => l.id === loanId);
+                    const targetCust = db.get('customers').find(c => c.id === targetLoan.customerId);
+                    
+                    document.getElementById('rctNo').innerText = receiptNo;
+                    document.getElementById('rctDate').innerText = new Date().toLocaleString();
+                    document.getElementById('rctName').innerText = targetCust.name;
+                    document.getElementById('rctLoan').innerText = targetLoan.loanNo;
+                    document.getElementById('rctAmount').innerText = originalAmount;
+                    document.getElementById('rctMode').innerText = mode;
+                    document.getElementById('rctSource').innerText = receiptSource;
+
+                    document.getElementById('paymentPanel').classList.add('hidden');
+                    app.router.navigate('receiptView');
+                }
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', app.init);
+    </script>
+</body>
+</html>
