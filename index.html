@@ -120,125 +120,190 @@
             .sidebar, .page-header, .no-print { display: none !important; }
         }
 
-        /* MOBILE UI IMPROVEMENTS */
+        /* MOBILE FIXES START */
         @media (max-width: 768px) {
-            /* Transform layout into an app-like structure */
-            .app-layout { flex-direction: column; }
-            .sidebar { display: contents; } /* Allows children to participate in flex flow */
+            /* 1. SCROLLING FIX & BODY NORMALIZE */
+            body { 
+                height: auto; 
+                overflow-y: auto; 
+                overflow-x: hidden;
+                -webkit-overflow-scrolling: touch;
+            }
+            .app-layout { 
+                flex-direction: column; 
+                height: auto; 
+                min-height: 100vh;
+            }
             
-            /* Order elements for mobile flow */
-            .sidebar-header { order: 1; padding: 1rem; background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; }
-            .sidebar-header h2 { font-size: 1.25rem; margin: 0; }
+            /* 2. STABILIZE MOBILE LAYOUT STRUCTURE (NO display: contents) */
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-shrink: 0;
+                display: flex;
+                flex-direction: column;
+            }
+            .sidebar-header {
+                padding: 1rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: var(--primary);
+            }
+            .sidebar-header h2 { font-size: 1.25rem; margin: 0; color: white; }
             .sidebar-header small { color: #e2e8f0; }
             
-            .main-content { order: 2; padding: 1rem; padding-bottom: 2rem; overflow-y: visible; }
-            
-            /* Bottom App Navigation */
-            .sidebar-nav { 
-                order: 3; 
-                display: flex; 
-                flex-direction: row; 
-                background: #ffffff; 
-                position: sticky; 
-                bottom: 0; 
-                z-index: 1000; 
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.1); 
-                overflow-x: auto;
-                border-top: 1px solid var(--border);
+            .sidebar-footer {
+                padding: 0.75rem 1rem;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+                background: #0f172a;
             }
-            .nav-item { 
-                flex: 1; 
-                text-align: center; 
-                padding: 0.75rem 0.5rem; 
+            .sidebar-footer .btn { 
+                padding: 0.6rem 0.25rem; 
                 font-size: 0.75rem; 
-                border-left: none; 
-                border-top: 3px solid transparent; 
-                color: var(--text-muted); 
+                margin: 0 !important; 
+                width: 100%; 
+                text-align: center; 
+            }
+            
+            .sidebar-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                background: #ffffff;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+                z-index: 1000;
+                border-top: 1px solid var(--border);
+                padding: 0;
+                overflow-x: auto;
+            }
+            .nav-item {
+                flex: 1;
+                text-align: center;
+                padding: 0.75rem 0.25rem;
+                font-size: 0.8rem;
+                border-left: none;
+                border-top: 3px solid transparent;
+                color: var(--text-muted);
                 white-space: nowrap;
             }
-            .nav-item.active { 
-                border-left: none; 
-                border-top-color: var(--primary); 
-                background: #eff6ff; 
-                color: var(--primary); 
+            .nav-item.active {
+                border-left: none;
+                border-top-color: var(--primary);
+                background: #eff6ff;
+                color: var(--primary);
+                font-weight: 600;
             }
-            .nav-item:hover { background: #f8fafc; }
-            
-            /* Utility Footer at bottom */
-            .sidebar-footer { 
-                order: 4; 
-                display: grid; 
-                grid-template-columns: 1fr 1fr 1fr; 
-                gap: 0.5rem; 
-                padding: 0.75rem; 
-                background: var(--sidebar); 
+
+            .main-content {
+                flex: 1;
+                overflow: visible; /* Native body scrolling */
+                padding: 1rem 1rem 5rem 1rem; /* Space for bottom nav */
+                background: #f1f5f9;
             }
-            .sidebar-footer .btn { margin: 0 !important; padding: 0.5rem; font-size: 0.75rem; width: 100%; }
-            
-            /* Refine Cards & Layouts */
+
+            /* 3. NORMALIZE FONT SCALE & SPACING */
             .page-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 1rem; }
-            .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-            .stat-card { padding: 1rem; }
-            .stat-value { font-size: 1.3rem; }
+            .page-header h2 { font-size: 1.25rem; }
+            
+            .card { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
+            .card h3 { font-size: 1.1rem; margin-bottom: 1rem; }
+            
+            /* 4. CLEAN EMPTY SPACE & CROWDING */
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
+            .stat-card { padding: 1rem; border-left-width: 3px; }
+            .stat-card .text-muted { font-size: 0.75rem; }
+            .stat-value { font-size: 1.25rem; margin-top: 0.25rem; }
             
             .dashboard-lists { grid-template-columns: 1fr; gap: 1rem; }
-            .card { padding: 1rem; margin-bottom: 1rem; }
             
-            /* Improve form usability */
             .form-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+            .form-group { margin-bottom: 0.75rem; }
+            .form-group label { font-size: 0.85rem; }
+            .form-group input, .form-group select { padding: 0.75rem; font-size: 1rem; } /* Touch-friendly inputs */
             .form-group .flex { flex-direction: column; gap: 0.5rem; }
             .form-group .flex input { width: 100%; }
             .form-group .flex .btn { width: 100%; justify-content: center; }
-            .btn { padding: 0.75rem; font-size: 1rem; width: 100%; }
             
-            /* Convert Tables to Mobile Cards */
+            .btn { padding: 0.75rem 1rem; font-size: 1rem; width: 100%; justify-content: center; }
+            .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.85rem; width: auto; }
+
+            /* 5. IMPROVE TABLE -> CARD VIEW */
             .table-wrapper { overflow: visible; }
-            .table-wrapper table, .table-wrapper thead, .table-wrapper tbody, .table-wrapper tr, .table-wrapper td, .table-wrapper th { display: block; width: 100%; }
-            .table-wrapper thead tr { position: absolute; top: -9999px; left: -9999px; } /* Visually hide headers */
-            .table-wrapper tr { 
-                background: #fff; 
-                border: 1px solid var(--border); 
-                border-radius: 8px; 
-                margin-bottom: 1rem; 
-                padding: 0.75rem; 
-                box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
-            }
-            .table-wrapper td { 
-                border: none; 
-                padding: 0.3rem 0; 
-                text-align: left; 
-                font-size: 0.9rem; 
-                color: var(--text-muted); 
-                display: block;
-            }
-            /* Style first column as Card Header */
-            .table-wrapper td:first-child { 
-                font-weight: bold; 
-                color: var(--text-main); 
-                font-size: 1.05rem; 
-                border-bottom: 1px solid var(--border); 
-                margin-bottom: 0.5rem; 
-                padding-bottom: 0.5rem; 
-            }
-            /* Style last column as Card Footer */
-            .table-wrapper td:last-child { 
-                border-top: 1px dashed var(--border); 
-                margin-top: 0.5rem; 
-                padding-top: 0.75rem; 
-                display: flex; 
-                flex-wrap: wrap; 
-                gap: 0.5rem; 
-                justify-content: flex-start; 
-                align-items: center;
-            }
-            .table-wrapper td:last-child .btn { flex: 1; padding: 0.5rem; font-size: 0.85rem; width: auto; }
-            .table-wrapper td:last-child .flex { width: 100%; flex-direction: row; gap: 0.5rem; }
+            table, thead, tbody, th, td, tr { display: block; width: 100%; }
+            thead tr { position: absolute; top: -9999px; left: -9999px; } /* Hide headers accessibly */
             
-            /* Specific element fixes */
-            #upcomingEmiAlert { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-            .receipt-row { flex-direction: column; align-items: flex-start; margin-bottom: 1rem; }
-            .receipt-row span { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.2rem; }
+            .table-wrapper tr {
+                background: #fff;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                padding: 1rem;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            }
+            
+            .table-wrapper td {
+                border: none;
+                padding: 0.25rem 0;
+                text-align: left;
+                font-size: 0.95rem;
+                color: var(--text-main);
+                position: relative;
+            }
+            
+            /* First cell acts as card title */
+            .table-wrapper td:first-child {
+                font-weight: 700;
+                font-size: 1.1rem;
+                color: var(--primary-dark);
+                border-bottom: 1px solid #f1f5f9;
+                margin-bottom: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+            
+            /* Action cells */
+            .table-wrapper td:last-child {
+                margin-top: 0.5rem;
+                padding-top: 0.75rem;
+                border-top: 1px dashed var(--border);
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                align-items: center;
+                justify-content: flex-start;
+            }
+            
+            .table-wrapper td:last-child .flex { width: 100%; flex-wrap: wrap; gap: 0.5rem; flex-direction: row; }
+            .table-wrapper td:last-child .btn { flex: 1; min-width: 45%; padding: 0.5rem; font-size: 0.85rem; }
+
+            /* Specific component fixes */
+            #upcomingEmiAlert {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                padding: 1rem;
+            }
+            
+            .receipt-box { padding: 1.5rem 1rem; border: 1px solid #ccc; border-radius: 8px; }
+            .receipt-row { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 0.25rem; 
+                border-bottom: 1px solid #f1f5f9; 
+                padding-bottom: 0.5rem; 
+                margin-bottom: 0.5rem; 
+            }
+            .receipt-row:last-child { border-bottom: none; }
+            .receipt-row span { font-size: 0.85rem; color: var(--text-muted); }
+            .receipt-row strong { font-size: 1rem; }
         }
+        /* MOBILE FIXES END */
     </style>
 </head>
 <body>
@@ -267,18 +332,18 @@
                 <h2>EMI Manager</h2>
                 <small id="userRoleDisplay" class="text-muted"></small>
             </div>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn btn-danger btn-block">Logout</button>
+                <button id="backupBtn" class="btn btn-secondary btn-block">Backup Data</button>
+                <input type="file" id="restoreFile" accept=".json" class="hidden">
+                <button id="restoreBtn" class="btn btn-secondary btn-block">Restore Data</button>
+            </div>
             <nav class="sidebar-nav">
                 <div class="nav-item active" data-target="dashboardView">Dashboard</div>
                 <div class="nav-item" data-target="customersView">Customers</div>
                 <div class="nav-item" data-target="loansView">Loans</div>
                 <div class="nav-item" data-target="collectionView">Collect EMI</div>
             </nav>
-            <div class="sidebar-footer">
-                <button id="logoutBtn" class="btn btn-danger btn-block">Logout</button>
-                <button id="backupBtn" class="btn btn-secondary btn-block" style="margin-top: 0.5rem;">Backup Data</button>
-                <input type="file" id="restoreFile" accept=".json" class="hidden">
-                <button id="restoreBtn" class="btn btn-secondary btn-block" style="margin-top: 0.5rem;">Restore Data</button>
-            </div>
         </aside>
 
         <main class="main-content">
@@ -420,8 +485,10 @@
                     <h3 id="payTitle" class="mb-4 text-primary"></h3>
                     
                     <div id="upcomingEmiAlert" class="mb-4 p-4 hidden" style="background: #fff7ed; border-left: 4px solid orange;">
-                        <strong>Next EMI:</strong> <span id="alertDate"></span> | 
-                        <strong>Amount:</strong> <span id="alertAmount"></span> |
+                        <div style="flex: 1;">
+                            <strong>Next EMI:</strong> <span id="alertDate"></span> | 
+                            <strong>Amount:</strong> <span id="alertAmount"></span>
+                        </div>
                         <span id="alertStatus" class="badge"></span>
                     </div>
 
@@ -458,9 +525,9 @@
                     <div class="receipt-row"><span>Payment Source:</span><strong id="rctSource"></strong></div>
                     <div class="receipt-row"><span>Mode:</span><strong id="rctMode"></strong></div>
                     
-                    <div class="mt-4 pt-4 text-center no-print">
+                    <div class="mt-4 pt-4 text-center no-print flex" style="gap: 1rem; flex-direction: column;">
                         <button onclick="window.print()" class="btn btn-primary">Print Receipt</button>
-                        <button onclick="app.router.navigate('collectionView')" class="btn btn-secondary" style="background:var(--sidebar); margin-left:1rem;">Collect Another</button>
+                        <button onclick="app.router.navigate('collectionView')" class="btn btn-secondary">Collect Another</button>
                     </div>
                 </div>
             </section>
@@ -562,6 +629,9 @@
                         document.getElementById('loanHistoryPanel').classList.add('hidden');
                         modules.loans.render();
                     }
+                    
+                    // Reset scroll to top on navigation (especially needed for mobile)
+                    window.scrollTo(0, 0);
                 },
                 showMainApp: () => {
                     document.getElementById('loginView').classList.add('hidden');
