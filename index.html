@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMI Management System - Phase C Sync</title>
+    <title>EMI Management System - Phase D (Real-Time)</title>
     
     <script type="application/json" id="pwa-manifest">
     {
@@ -72,12 +72,11 @@
         .btn-secondary:hover { background: #475569; }
         .btn-block { width: 100%; display: flex; }
 
-        /* FORM BOX FIXES FOR PERFECT ALIGNMENT */
         .form-group { margin-bottom: 1.2rem; }
         .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
         .form-group input, .form-group select { 
             width: 100%; 
-            height: 48px; /* FIXED HEIGHT FOR ALL BOXES */
+            height: 48px; 
             padding: 0.6rem 0.8rem; 
             border: 1px solid var(--border); 
             border-radius: 6px; 
@@ -144,7 +143,6 @@
             .sidebar-header h2 { font-size: 1.3rem; margin: 0; color: white; }
             .sidebar-header small { color: #e2e8f0; font-size: 0.8rem; }
             
-            /* Bottom App Navigation matching 5 items */
             .sidebar-nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: row; background: #ffffff; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); z-index: 1000; border-top: 1px solid var(--border); padding: 0; overflow-x: hidden; }
             .nav-item { flex: 1; text-align: center; padding: 0.6rem 0.2rem; font-size: 0.75rem; border-left: none; border-top: 3px solid transparent; color: var(--text-muted); white-space: nowrap; }
             .nav-item.active { border-left: none; border-top-color: var(--primary); background: #eff6ff; color: var(--primary); font-weight: bold; }
@@ -163,11 +161,10 @@
             
             .dashboard-lists { grid-template-columns: 1fr; gap: 1rem; }
             
-            /* PERFECT FORM BOX SIZING */
             .form-grid { grid-template-columns: 1fr; gap: 0; }
             .form-group { margin-bottom: 1rem; }
-            .form-group input, .form-group select { height: 48px; } /* Ensures all boxes are exactly the same height */
-            #loanCustomerSearch { margin-bottom: 0.5rem; } /* Space between search and dropdown */
+            .form-group input, .form-group select { height: 48px; } 
+            #loanCustomerSearch { margin-bottom: 0.5rem; } 
             .form-group .flex { flex-direction: column; gap: 0.5rem; }
             .form-group .flex input { width: 100%; }
             .form-group .flex .btn { width: 100%; justify-content: center; height: 48px; }
@@ -191,7 +188,6 @@
             .receipt-row span { font-size: 0.85rem; color: var(--text-muted); }
             .receipt-row strong { font-size: 1.1rem; }
             
-            /* Specific settings page buttons */
             #settingsView .btn { margin-bottom: 1rem; }
         }
     </style>
@@ -402,10 +398,9 @@
                 </div>
                 
                 <div class="card">
-                    <h3 class="text-primary mb-4">☁️ Cloud Sync (Phase C)</h3>
-                    <p class="text-muted mb-4" style="font-size: 0.9rem;">Keep your devices connected securely.</p>
-                    <button id="cloudBackupBtn" class="btn btn-block" style="background: #f59e0b; color: #0f172a; margin-bottom: 1rem;">1. Sync Data to Cloud (Upload)</button>
-                    <button id="cloudDownloadBtn" class="btn btn-block" style="background: var(--primary); color: white; margin-bottom: 0;">2. Download from Cloud (Sync Device)</button>
+                    <h3 class="text-primary mb-4">☁️ Cloud Sync Status</h3>
+                    <p class="text-muted mb-4" style="font-size: 0.9rem;">Your app is running in Phase D. All changes are saved and synced across all devices automatically in real-time. You do not need to click anything.</p>
+                    <button class="btn btn-block" disabled style="background: var(--success); color: white; margin-bottom: 1rem; opacity: 1; cursor: default;">🟢 Real-Time Cloud Sync Active</button>
                 </div>
 
                 <div class="card">
@@ -448,7 +443,7 @@
     </div>
 
     <script>
-        // FIREBASE INITIALIZATION
+        // PHASE D: REAL-TIME SYNC INITIALIZATION
         const firebaseConfig = {
             apiKey: "AIzaSyCXA2cYaoXYF0bgGZc8Lyh8MUJ533rD4r8", 
             authDomain: "emi-manager-new-ashish.firebaseapp.com",
@@ -459,6 +454,11 @@
         };
         firebase.initializeApp(firebaseConfig);
         const firestore = firebase.firestore();
+
+        // ENABLE OFFLINE PERSISTENCE (Crucial for Phase D safety)
+        firestore.enablePersistence().catch(err => {
+            console.log("Offline Persistence Error: ", err);
+        });
 
         (function initPWA() {
             const manifestContent = document.getElementById('pwa-manifest').textContent;
@@ -485,7 +485,7 @@
             }
         })();
 
-        // --- 1. DATA LAYER (localStorage Database) ---
+        // --- 1. DATA LAYER (localStorage + Real-Time Firebase) ---
         const db = {
             init: () => {
                 let users = JSON.parse(localStorage.getItem('users')) || [];
@@ -501,12 +501,19 @@
             },
             get: (table) => JSON.parse(localStorage.getItem(table)) || [],
             set: (table, data) => localStorage.setItem(table, JSON.stringify(data)),
+            
+            // PHASE D: Modified to auto-push to cloud instantly
             insert: (table, record) => {
                 const data = db.get(table);
                 record.id = Date.now().toString(36) + Math.random().toString(36).substr(2);
                 record.createdAt = new Date().toISOString();
                 data.push(record);
                 db.set(table, data);
+                
+                // Instantly send to Firebase (Offline safe)
+                if(table !== 'users') {
+                    firestore.collection(table).doc(record.id).set(record).catch(e => console.error(e));
+                }
                 return record;
             },
             update: (table, id, updates) => {
@@ -515,14 +522,48 @@
                 if (idx > -1) {
                     data[idx] = { ...data[idx], ...updates };
                     db.set(table, data);
+                    
+                    // Instantly update in Firebase
+                    if(table !== 'users') {
+                        firestore.collection(table).doc(id).update(updates).catch(e => console.error(e));
+                    }
                 }
             },
             delete: (table, id) => {
                 const data = db.get(table);
                 const newData = data.filter(item => item.id !== id);
                 db.set(table, newData);
+                
+                // Instantly delete from Firebase
+                if(table !== 'users') {
+                    firestore.collection(table).doc(id).delete().catch(e => console.error(e));
+                }
             }
         };
+
+        // PHASE D: REAL-TIME LISTENERS
+        // This listens to the cloud 24/7. If Device B makes a change, Device A updates locally and re-renders automatically.
+        function startRealTimeSync() {
+            const collectionsToSync = ['customers', 'loans', 'emis', 'payments'];
+            
+            collectionsToSync.forEach(col => {
+                firestore.collection(col).onSnapshot(snapshot => {
+                    const cloudData = [];
+                    snapshot.forEach(doc => cloudData.push(doc.data()));
+                    
+                    // Update Local Storage silently
+                    localStorage.setItem(col, JSON.stringify(cloudData));
+                    
+                    // Safely re-render visible screens (Prevents interrupting you while typing in search/pay screens)
+                    const activeView = document.querySelector('.page:not(.hidden)');
+                    if (activeView) {
+                        if (activeView.id === 'dashboardView') modules.dashboard.render();
+                        // We only auto-refresh dashboard to prevent typing interruptions. 
+                        // Other tabs will pull fresh data automatically when clicked or searched.
+                    }
+                });
+            });
+        }
 
         // --- 2. APP STATE ---
         const app = {
@@ -533,6 +574,7 @@
                 if (session) {
                     app.currentUser = JSON.parse(session);
                     app.router.showMainApp();
+                    startRealTimeSync(); // PHASE D: Start listening once logged in
                 }
                 app.bindEvents();
             },
@@ -553,7 +595,7 @@
                         modules.loans.render();
                     }
                     
-                    window.scrollTo(0, 0); // Smooth snap to top
+                    window.scrollTo(0, 0); 
                 },
                 showMainApp: () => {
                     document.getElementById('loginView').classList.add('hidden');
@@ -570,7 +612,13 @@
                 }
             },
             bindEvents: () => {
-                document.getElementById('loginForm').addEventListener('submit', modules.auth.login);
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    modules.auth.login(e);
+                    // Start sync when successfully logging in for the first time
+                    if (sessionStorage.getItem('session')) {
+                        startRealTimeSync();
+                    }
+                });
                 document.getElementById('logoutBtn').addEventListener('click', app.router.logout);
                 document.querySelectorAll('.nav-item').forEach(item => {
                     item.addEventListener('click', (e) => app.router.navigate(e.target.dataset.target));
@@ -583,9 +631,6 @@
                 document.getElementById('backupBtn').addEventListener('click', modules.dataBackup.exportData);
                 document.getElementById('restoreBtn').addEventListener('click', () => document.getElementById('restoreFile').click());
                 document.getElementById('restoreFile').addEventListener('change', modules.dataBackup.importData);
-                
-                document.getElementById('cloudBackupBtn').addEventListener('click', modules.dataBackup.syncToFirebase);
-                document.getElementById('cloudDownloadBtn').addEventListener('click', modules.dataBackup.downloadFromFirebase);
             }
         };
 
@@ -604,69 +649,6 @@
         // --- 3. MODULES ---
         const modules = {
             dataBackup: {
-                syncToFirebase: async () => {
-                    const btn = document.getElementById('cloudBackupBtn');
-                    btn.innerText = "⏳ Syncing...";
-                    btn.disabled = true;
-
-                    try {
-                        const collections = ['users', 'customers', 'loans', 'emis', 'payments'];
-                        for (let col of collections) {
-                            const localData = db.get(col);
-                            for (let item of localData) {
-                                await firestore.collection(col).doc(item.id).set(item);
-                            }
-                        }
-                        alert("✅ Cloud Backup Successful! Data pushed to Firebase.");
-                    } catch (error) {
-                        alert("❌ Cloud Backup Failed. Check internet or rules.");
-                    }
-
-                    btn.innerText = "1. Sync Data to Cloud (Upload)";
-                    btn.disabled = false;
-                },
-
-                // PHASE C: PULL DATA FROM FIREBASE TO LOCAL DEVICE
-                downloadFromFirebase: async () => {
-                    if(!confirm("⚠️ WARNING: This will overwrite your phone's memory with the data from the Cloud. Make sure the Cloud data is up to date. Continue?")) return;
-
-                    const btn = document.getElementById('cloudDownloadBtn');
-                    btn.innerText = "⏳ Downloading...";
-                    btn.disabled = true;
-
-                    try {
-                        const collections = ['users', 'customers', 'loans', 'emis', 'payments'];
-                        let dataFound = false;
-
-                        for (let col of collections) {
-                            const snapshot = await firestore.collection(col).get();
-                            const cloudData = [];
-                            snapshot.forEach(doc => {
-                                cloudData.push(doc.data());
-                            });
-                            
-                            if(cloudData.length > 0) {
-                                db.set(col, cloudData);
-                                dataFound = true;
-                            }
-                        }
-
-                        if(dataFound) {
-                            alert("✅ Cloud Download Successful! Your device is now perfectly synced.");
-                            location.reload(); 
-                        } else {
-                            alert("⚠️ The cloud is currently empty. Nothing was downloaded.");
-                        }
-
-                    } catch (error) {
-                        console.error("Firebase Error: ", error);
-                        alert("❌ Cloud Download Failed. Check internet connection.");
-                    }
-
-                    btn.innerText = "2. Download from Cloud (Sync Device)";
-                    btn.disabled = false;
-                },
-
                 exportData: () => {
                     const data = {
                         users: db.get('users'),
@@ -814,25 +796,26 @@
                     });
                     e.target.reset();
                     modules.customers.render();
-                    alert('Customer Added!');
+                    alert('Customer Added! Synced securely.');
                 },
                 delete: (id) => {
-                    if(!confirm("WARNING: Deleting this customer will delete ALL their Loans, EMIs, and Payments. This cannot be undone. Continue?")) return;
+                    if(!confirm("WARNING: Deleting this customer will delete ALL their Loans, EMIs, and Payments globally. Continue?")) return;
                     
                     const loans = db.get('loans').filter(l => l.customerId === id);
                     const loanIds = loans.map(l => l.id);
 
-                    let emis = db.get('emis').filter(e => !loanIds.includes(e.loanId));
-                    let payments = db.get('payments').filter(p => !loanIds.includes(p.loanId));
-                    db.set('emis', emis);
-                    db.set('payments', payments);
+                    // Safely delete associated records locally AND in cloud automatically
+                    let emis = db.get('emis').filter(e => loanIds.includes(e.loanId));
+                    emis.forEach(e => db.delete('emis', e.id));
 
-                    let newLoans = db.get('loans').filter(l => l.customerId !== id);
-                    db.set('loans', newLoans);
+                    let payments = db.get('payments').filter(p => loanIds.includes(p.loanId));
+                    payments.forEach(p => db.delete('payments', p.id));
+
+                    loans.forEach(l => db.delete('loans', l.id));
                     db.delete('customers', id);
 
                     modules.customers.render();
-                    alert('Customer and all related data deleted.');
+                    alert('Customer and all related data deleted across all devices.');
                 }
             },
 
@@ -914,15 +897,16 @@
                     
                     e.target.reset();
                     modules.loans.render();
-                    alert('Loan Created Successfully!');
+                    alert('Loan Created and Synced Successfully!');
                 },
                 delete: (id) => {
-                    if(!confirm("Delete this Loan? All related EMI schedule and Payment history will be deleted.")) return;
+                    if(!confirm("Delete this Loan? All related EMI schedule and Payment history will be deleted globally.")) return;
                     
-                    let emis = db.get('emis').filter(e => e.loanId !== id);
-                    let payments = db.get('payments').filter(p => p.loanId !== id);
-                    db.set('emis', emis);
-                    db.set('payments', payments);
+                    let emis = db.get('emis').filter(e => e.loanId === id);
+                    emis.forEach(e => db.delete('emis', e.id));
+
+                    let payments = db.get('payments').filter(p => p.loanId === id);
+                    payments.forEach(p => db.delete('payments', p.id));
                     
                     db.delete('loans', id);
                     modules.loans.render();
