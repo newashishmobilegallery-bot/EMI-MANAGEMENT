@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMI Management System - Final Rebuild</title>
+    <title>EMI Management System - Mobile Optimized</title>
     
     <script type="application/json" id="pwa-manifest">
     {
@@ -108,7 +108,6 @@
         .bg-scheduled { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 
         .dashboard-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-        @media (max-width: 900px) { .dashboard-lists { grid-template-columns: 1fr; } }
 
         .receipt-box { border: 2px dashed #ccc; padding: 2rem; max-width: 600px; margin: 0 auto; background: white; }
         .receipt-header { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
@@ -119,6 +118,126 @@
             #receiptView, #receiptView * { visibility: visible; }
             #receiptView { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
             .sidebar, .page-header, .no-print { display: none !important; }
+        }
+
+        /* MOBILE UI IMPROVEMENTS */
+        @media (max-width: 768px) {
+            /* Transform layout into an app-like structure */
+            .app-layout { flex-direction: column; }
+            .sidebar { display: contents; } /* Allows children to participate in flex flow */
+            
+            /* Order elements for mobile flow */
+            .sidebar-header { order: 1; padding: 1rem; background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; }
+            .sidebar-header h2 { font-size: 1.25rem; margin: 0; }
+            .sidebar-header small { color: #e2e8f0; }
+            
+            .main-content { order: 2; padding: 1rem; padding-bottom: 2rem; overflow-y: visible; }
+            
+            /* Bottom App Navigation */
+            .sidebar-nav { 
+                order: 3; 
+                display: flex; 
+                flex-direction: row; 
+                background: #ffffff; 
+                position: sticky; 
+                bottom: 0; 
+                z-index: 1000; 
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1); 
+                overflow-x: auto;
+                border-top: 1px solid var(--border);
+            }
+            .nav-item { 
+                flex: 1; 
+                text-align: center; 
+                padding: 0.75rem 0.5rem; 
+                font-size: 0.75rem; 
+                border-left: none; 
+                border-top: 3px solid transparent; 
+                color: var(--text-muted); 
+                white-space: nowrap;
+            }
+            .nav-item.active { 
+                border-left: none; 
+                border-top-color: var(--primary); 
+                background: #eff6ff; 
+                color: var(--primary); 
+            }
+            .nav-item:hover { background: #f8fafc; }
+            
+            /* Utility Footer at bottom */
+            .sidebar-footer { 
+                order: 4; 
+                display: grid; 
+                grid-template-columns: 1fr 1fr 1fr; 
+                gap: 0.5rem; 
+                padding: 0.75rem; 
+                background: var(--sidebar); 
+            }
+            .sidebar-footer .btn { margin: 0 !important; padding: 0.5rem; font-size: 0.75rem; width: 100%; }
+            
+            /* Refine Cards & Layouts */
+            .page-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 1rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+            .stat-card { padding: 1rem; }
+            .stat-value { font-size: 1.3rem; }
+            
+            .dashboard-lists { grid-template-columns: 1fr; gap: 1rem; }
+            .card { padding: 1rem; margin-bottom: 1rem; }
+            
+            /* Improve form usability */
+            .form-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+            .form-group .flex { flex-direction: column; gap: 0.5rem; }
+            .form-group .flex input { width: 100%; }
+            .form-group .flex .btn { width: 100%; justify-content: center; }
+            .btn { padding: 0.75rem; font-size: 1rem; width: 100%; }
+            
+            /* Convert Tables to Mobile Cards */
+            .table-wrapper { overflow: visible; }
+            .table-wrapper table, .table-wrapper thead, .table-wrapper tbody, .table-wrapper tr, .table-wrapper td, .table-wrapper th { display: block; width: 100%; }
+            .table-wrapper thead tr { position: absolute; top: -9999px; left: -9999px; } /* Visually hide headers */
+            .table-wrapper tr { 
+                background: #fff; 
+                border: 1px solid var(--border); 
+                border-radius: 8px; 
+                margin-bottom: 1rem; 
+                padding: 0.75rem; 
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+            }
+            .table-wrapper td { 
+                border: none; 
+                padding: 0.3rem 0; 
+                text-align: left; 
+                font-size: 0.9rem; 
+                color: var(--text-muted); 
+                display: block;
+            }
+            /* Style first column as Card Header */
+            .table-wrapper td:first-child { 
+                font-weight: bold; 
+                color: var(--text-main); 
+                font-size: 1.05rem; 
+                border-bottom: 1px solid var(--border); 
+                margin-bottom: 0.5rem; 
+                padding-bottom: 0.5rem; 
+            }
+            /* Style last column as Card Footer */
+            .table-wrapper td:last-child { 
+                border-top: 1px dashed var(--border); 
+                margin-top: 0.5rem; 
+                padding-top: 0.75rem; 
+                display: flex; 
+                flex-wrap: wrap; 
+                gap: 0.5rem; 
+                justify-content: flex-start; 
+                align-items: center;
+            }
+            .table-wrapper td:last-child .btn { flex: 1; padding: 0.5rem; font-size: 0.85rem; width: auto; }
+            .table-wrapper td:last-child .flex { width: 100%; flex-direction: row; gap: 0.5rem; }
+            
+            /* Specific element fixes */
+            #upcomingEmiAlert { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .receipt-row { flex-direction: column; align-items: flex-start; margin-bottom: 1rem; }
+            .receipt-row span { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.2rem; }
         }
     </style>
 </head>
@@ -352,7 +471,6 @@
     <script>
         // FINAL REBUILD FIX: PWA Initialization
         (function initPWA() {
-            // Inject Manifest
             const manifestContent = document.getElementById('pwa-manifest').textContent;
             const manifestBlob = new Blob([manifestContent], { type: 'application/json' });
             const manifestUrl = URL.createObjectURL(manifestBlob);
@@ -361,13 +479,11 @@
             link.href = manifestUrl;
             document.head.appendChild(link);
 
-            // Register Service Worker
             if ('serviceWorker' in navigator) {
                 const swCode = `
                     self.addEventListener('install', (e) => self.skipWaiting());
                     self.addEventListener('activate', (e) => self.clients.claim());
                     self.addEventListener('fetch', (e) => {
-                        // Pass-through fetch for PWA installability requirements
                         e.respondWith(fetch(e.request).catch(() => new Response('Offline.')));
                     });
                 `;
@@ -382,12 +498,11 @@
         // --- 1. DATA LAYER (localStorage Database) ---
         const db = {
             init: () => {
-                // FINAL REBUILD FIX: Exact credentials, clear previous ones to avoid conflict
                 let users = JSON.parse(localStorage.getItem('users')) || [];
                 const exactAdminExists = users.some(u => u.email === 'NEWASHISHMOBILE' && u.password === 'Ashish@12');
                 if (!exactAdminExists) {
                     localStorage.setItem('users', JSON.stringify([{ id: '1', email: 'NEWASHISHMOBILE', password: 'Ashish@12', role: 'Admin', name: 'Owner' }]));
-                    sessionStorage.removeItem('session'); // Force re-login if credentials were out of date
+                    sessionStorage.removeItem('session'); 
                 }
 
                 ['customers', 'loans', 'emis', 'payments'].forEach(key => {
@@ -572,7 +687,6 @@
                     const upcomingList = [];
 
                     emis.forEach(emi => {
-                        // FINAL REBUILD FIX: EMI Status Normalization
                         if (emi.status !== 'Paid') {
                             const dueAmt = parseFloat(emi.amount) - parseFloat(emi.paid || 0);
                             outstanding += dueAmt;
@@ -736,7 +850,7 @@
                             amount: emiAmt,
                             paid: 0,
                             status: 'Pending',
-                            paymentSource: 'SHOP' // Default Source
+                            paymentSource: 'SHOP'
                         });
                     }
                     
@@ -921,12 +1035,10 @@
 
                     const emis = db.get('emis').filter(e => e.loanId === loanId && e.status !== 'Paid');
                     
-                    // FINAL REBUILD FIX: Payment Guard
                     if (emis.length === 0) {
                         return alert('No pending EMI available for this loan');
                     }
 
-                    // FINAL REBUILD FIX: Unique Receipt Number
                     const datePart = new Date().toISOString().slice(0,10).replace(/-/g, '');
                     const randomPart = Math.random().toString(36).substr(2, 6).toUpperCase();
                     const receiptNo = `RCPT-${datePart}-${randomPart}`;
