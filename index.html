@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMI Management System - Mobile Optimized</title>
+    <title>EMI Management System - Cloud Ready</title>
     
     <script type="application/json" id="pwa-manifest">
     {
@@ -22,6 +22,9 @@
       ]
     }
     </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <style>
         /* =========================================================
@@ -120,190 +123,66 @@
             .sidebar, .page-header, .no-print { display: none !important; }
         }
 
-        /* MOBILE FIXES START */
+        /* MOBILE FIXES */
         @media (max-width: 768px) {
-            /* 1. SCROLLING FIX & BODY NORMALIZE */
-            body { 
-                height: auto; 
-                overflow-y: auto; 
-                overflow-x: hidden;
-                -webkit-overflow-scrolling: touch;
-            }
-            .app-layout { 
-                flex-direction: column; 
-                height: auto; 
-                min-height: 100vh;
-            }
-            
-            /* 2. STABILIZE MOBILE LAYOUT STRUCTURE (NO display: contents) */
-            .sidebar {
-                width: 100%;
-                height: auto;
-                flex-shrink: 0;
-                display: flex;
-                flex-direction: column;
-            }
-            .sidebar-header {
-                padding: 1rem;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                background: var(--primary);
-            }
+            body { height: auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+            .app-layout { flex-direction: column; height: auto; min-height: 100vh; }
+            .sidebar { width: 100%; height: auto; flex-shrink: 0; display: flex; flex-direction: column; }
+            .sidebar-header { padding: 1rem; display: flex; justify-content: space-between; align-items: center; background: var(--primary); }
             .sidebar-header h2 { font-size: 1.25rem; margin: 0; color: white; }
             .sidebar-header small { color: #e2e8f0; }
             
             .sidebar-footer {
                 padding: 0.75rem 1rem;
                 display: grid;
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: 1fr 1fr;
                 gap: 0.5rem;
                 background: #0f172a;
             }
-            .sidebar-footer .btn { 
-                padding: 0.6rem 0.25rem; 
-                font-size: 0.75rem; 
-                margin: 0 !important; 
-                width: 100%; 
-                text-align: center; 
-            }
+            .sidebar-footer .btn { padding: 0.6rem 0.25rem; font-size: 0.75rem; margin: 0 !important; width: 100%; text-align: center; }
+            /* PHASE B: Make Cloud button span full width on mobile */
+            #cloudBackupBtn { grid-column: span 2; }
             
-            .sidebar-nav {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                display: flex;
-                flex-direction: row;
-                background: #ffffff;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-                z-index: 1000;
-                border-top: 1px solid var(--border);
-                padding: 0;
-                overflow-x: auto;
-            }
-            .nav-item {
-                flex: 1;
-                text-align: center;
-                padding: 0.75rem 0.25rem;
-                font-size: 0.8rem;
-                border-left: none;
-                border-top: 3px solid transparent;
-                color: var(--text-muted);
-                white-space: nowrap;
-            }
-            .nav-item.active {
-                border-left: none;
-                border-top-color: var(--primary);
-                background: #eff6ff;
-                color: var(--primary);
-                font-weight: 600;
-            }
-
-            .main-content {
-                flex: 1;
-                overflow: visible; /* Native body scrolling */
-                padding: 1rem 1rem 5rem 1rem; /* Space for bottom nav */
-                background: #f1f5f9;
-            }
-
-            /* 3. NORMALIZE FONT SCALE & SPACING */
+            .sidebar-nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: row; background: #ffffff; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000; border-top: 1px solid var(--border); padding: 0; overflow-x: auto; }
+            .nav-item { flex: 1; text-align: center; padding: 0.75rem 0.25rem; font-size: 0.8rem; border-left: none; border-top: 3px solid transparent; color: var(--text-muted); white-space: nowrap; }
+            .nav-item.active { border-left: none; border-top-color: var(--primary); background: #eff6ff; color: var(--primary); font-weight: 600; }
+            .main-content { flex: 1; overflow: visible; padding: 1rem 1rem 5rem 1rem; background: #f1f5f9; }
             .page-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 1rem; }
             .page-header h2 { font-size: 1.25rem; }
-            
             .card { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
             .card h3 { font-size: 1.1rem; margin-bottom: 1rem; }
-            
-            /* 4. CLEAN EMPTY SPACE & CROWDING */
             .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
             .stat-card { padding: 1rem; border-left-width: 3px; }
             .stat-card .text-muted { font-size: 0.75rem; }
             .stat-value { font-size: 1.25rem; margin-top: 0.25rem; }
-            
             .dashboard-lists { grid-template-columns: 1fr; gap: 1rem; }
-            
             .form-grid { grid-template-columns: 1fr; gap: 0.75rem; }
             .form-group { margin-bottom: 0.75rem; }
             .form-group label { font-size: 0.85rem; }
-            .form-group input, .form-group select { padding: 0.75rem; font-size: 1rem; } /* Touch-friendly inputs */
+            .form-group input, .form-group select { padding: 0.75rem; font-size: 1rem; }
             .form-group .flex { flex-direction: column; gap: 0.5rem; }
             .form-group .flex input { width: 100%; }
             .form-group .flex .btn { width: 100%; justify-content: center; }
-            
             .btn { padding: 0.75rem 1rem; font-size: 1rem; width: 100%; justify-content: center; }
             .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.85rem; width: auto; }
 
-            /* 5. IMPROVE TABLE -> CARD VIEW */
             .table-wrapper { overflow: visible; }
             table, thead, tbody, th, td, tr { display: block; width: 100%; }
-            thead tr { position: absolute; top: -9999px; left: -9999px; } /* Hide headers accessibly */
-            
-            .table-wrapper tr {
-                background: #fff;
-                border: 1px solid var(--border);
-                border-radius: 8px;
-                margin-bottom: 1rem;
-                padding: 1rem;
-                box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            }
-            
-            .table-wrapper td {
-                border: none;
-                padding: 0.25rem 0;
-                text-align: left;
-                font-size: 0.95rem;
-                color: var(--text-main);
-                position: relative;
-            }
-            
-            /* First cell acts as card title */
-            .table-wrapper td:first-child {
-                font-weight: 700;
-                font-size: 1.1rem;
-                color: var(--primary-dark);
-                border-bottom: 1px solid #f1f5f9;
-                margin-bottom: 0.5rem;
-                padding-bottom: 0.5rem;
-            }
-            
-            /* Action cells */
-            .table-wrapper td:last-child {
-                margin-top: 0.5rem;
-                padding-top: 0.75rem;
-                border-top: 1px dashed var(--border);
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-                align-items: center;
-                justify-content: flex-start;
-            }
-            
+            thead tr { position: absolute; top: -9999px; left: -9999px; }
+            .table-wrapper tr { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+            .table-wrapper td { border: none; padding: 0.25rem 0; text-align: left; font-size: 0.95rem; color: var(--text-main); position: relative; }
+            .table-wrapper td:first-child { font-weight: 700; font-size: 1.1rem; color: var(--primary-dark); border-bottom: 1px solid #f1f5f9; margin-bottom: 0.5rem; padding-bottom: 0.5rem; }
+            .table-wrapper td:last-child { margin-top: 0.5rem; padding-top: 0.75rem; border-top: 1px dashed var(--border); display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: flex-start; }
             .table-wrapper td:last-child .flex { width: 100%; flex-wrap: wrap; gap: 0.5rem; flex-direction: row; }
             .table-wrapper td:last-child .btn { flex: 1; min-width: 45%; padding: 0.5rem; font-size: 0.85rem; }
 
-            /* Specific component fixes */
-            #upcomingEmiAlert {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-                padding: 1rem;
-            }
-            
+            #upcomingEmiAlert { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 1rem; }
             .receipt-box { padding: 1.5rem 1rem; border: 1px solid #ccc; border-radius: 8px; }
-            .receipt-row { 
-                flex-direction: column; 
-                align-items: flex-start; 
-                gap: 0.25rem; 
-                border-bottom: 1px solid #f1f5f9; 
-                padding-bottom: 0.5rem; 
-                margin-bottom: 0.5rem; 
-            }
+            .receipt-row { flex-direction: column; align-items: flex-start; gap: 0.25rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
             .receipt-row:last-child { border-bottom: none; }
             .receipt-row span { font-size: 0.85rem; color: var(--text-muted); }
             .receipt-row strong { font-size: 1rem; }
         }
-        /* MOBILE FIXES END */
     </style>
 </head>
 <body>
@@ -334,9 +213,11 @@
             </div>
             <div class="sidebar-footer">
                 <button id="logoutBtn" class="btn btn-danger btn-block">Logout</button>
-                <button id="backupBtn" class="btn btn-secondary btn-block">Backup Data</button>
+                <button id="backupBtn" class="btn btn-secondary btn-block">Download Backup</button>
                 <input type="file" id="restoreFile" accept=".json" class="hidden">
-                <button id="restoreBtn" class="btn btn-secondary btn-block">Restore Data</button>
+                <button id="restoreBtn" class="btn btn-secondary btn-block">Restore File</button>
+                
+                <button id="cloudBackupBtn" class="btn btn-primary btn-block" style="background: var(--warning); color: var(--text-main); font-weight: bold; margin-top: 0.5rem;">☁️ Sync to Cloud</button>
             </div>
             <nav class="sidebar-nav">
                 <div class="nav-item active" data-target="dashboardView">Dashboard</div>
@@ -536,7 +417,19 @@
     </div>
 
     <script>
-        // FINAL REBUILD FIX: PWA Initialization
+        // PHASE B: FIREBASE INITIALIZATION & CONNECTION
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXA2cYaoXYF0bgGZc8Lyh8MUJ533rD4r8", // Fixed syntax typos from input
+            authDomain: "emi-manager-new-ashish.firebaseapp.com",
+            projectId: "emi-manager-new-ashish",
+            storageBucket: "emi-manager-new-ashish.firebasestorage.app",
+            messagingSenderId: "27936023107",
+            appId: "1:27936023107:web:8f3df71f87369bb477eaf6"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const firestore = firebase.firestore();
+
+
         (function initPWA() {
             const manifestContent = document.getElementById('pwa-manifest').textContent;
             const manifestBlob = new Blob([manifestContent], { type: 'application/json' });
@@ -630,7 +523,6 @@
                         modules.loans.render();
                     }
                     
-                    // Reset scroll to top on navigation (especially needed for mobile)
                     window.scrollTo(0, 0);
                 },
                 showMainApp: () => {
@@ -661,6 +553,9 @@
                 document.getElementById('backupBtn').addEventListener('click', modules.dataBackup.exportData);
                 document.getElementById('restoreBtn').addEventListener('click', () => document.getElementById('restoreFile').click());
                 document.getElementById('restoreFile').addEventListener('change', modules.dataBackup.importData);
+                
+                // PHASE B: Attach Cloud Sync Function
+                document.getElementById('cloudBackupBtn').addEventListener('click', modules.dataBackup.syncToFirebase);
             }
         };
 
@@ -679,6 +574,35 @@
         // --- 3. MODULES ---
         const modules = {
             dataBackup: {
+                // PHASE B: FIREBASE SYNC LOGIC
+                syncToFirebase: async () => {
+                    const btn = document.getElementById('cloudBackupBtn');
+                    btn.innerText = "⏳ Syncing...";
+                    btn.disabled = true;
+
+                    try {
+                        // The exact collections we want to copy into Firebase
+                        const collections = ['users', 'customers', 'loans', 'emis', 'payments'];
+                        
+                        // Loop over local data and push to Firebase silently
+                        for (let col of collections) {
+                            const localData = db.get(col);
+                            for (let item of localData) {
+                                // .set() creates or safely overwrites the exact copy in the cloud
+                                await firestore.collection(col).doc(item.id).set(item);
+                            }
+                        }
+                        
+                        alert("✅ Cloud Backup Successful! All your local data is safely stored in Firebase.");
+                    } catch (error) {
+                        console.error("Firebase Error: ", error);
+                        alert("❌ Cloud Backup Failed. Check your internet connection or Firebase database rules.");
+                    }
+
+                    btn.innerText = "☁️ Sync to Cloud";
+                    btn.disabled = false;
+                },
+
                 exportData: () => {
                     const data = {
                         users: db.get('users'),
