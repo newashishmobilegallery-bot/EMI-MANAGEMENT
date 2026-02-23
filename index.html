@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMI Management System - Cloud Ready</title>
+    <title>EMI Management System - Phase C Sync</title>
     
     <script type="application/json" id="pwa-manifest">
     {
@@ -62,8 +62,8 @@
         .text-primary { color: var(--primary); }
         .font-bold { font-weight: bold; }
 
-        .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: 0.2s; color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem;}
-        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 0.95rem;}
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
         .btn-primary { background: var(--primary); }
         .btn-primary:hover { background: var(--primary-dark); }
         .btn-success { background: var(--success); }
@@ -72,38 +72,49 @@
         .btn-secondary:hover { background: #475569; }
         .btn-block { width: 100%; display: flex; }
 
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
-        .form-group input, .form-group select { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; font-size: 1rem; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        /* FORM BOX FIXES FOR PERFECT ALIGNMENT */
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            height: 48px; /* FIXED HEIGHT FOR ALL BOXES */
+            padding: 0.6rem 0.8rem; 
+            border: 1px solid var(--border); 
+            border-radius: 6px; 
+            font-size: 1rem; 
+            background: #fff;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 
         .login-view { height: 100vh; display: flex; justify-content: center; align-items: center; background: #cbd5e1; }
-        .login-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .login-card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin: 1rem; }
 
         .app-layout { display: flex; height: 100vh; }
         .sidebar { width: 250px; background: var(--sidebar); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
         .sidebar-header { padding: 1.5rem; border-bottom: 1px solid #334155; }
-        .sidebar-nav { padding: 1rem 0; flex: 1; }
-        .nav-item { padding: 0.75rem 1.5rem; color: #cbd5e1; text-decoration: none; display: block; cursor: pointer; border-left: 4px solid transparent; }
+        .sidebar-nav { padding: 1rem 0; flex: 1; overflow-y: auto; }
+        .nav-item { padding: 0.85rem 1.5rem; color: #cbd5e1; text-decoration: none; display: block; cursor: pointer; border-left: 4px solid transparent; font-weight: 500; }
         .nav-item:hover, .nav-item.active { background: var(--sidebar-hover); color: white; border-left-color: var(--primary); }
-        .sidebar-footer { padding: 1rem; border-top: 1px solid #334155; }
 
         .main-content { flex: 1; overflow-y: auto; padding: 2rem; background: #f1f5f9; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem; }
         
-        .card { background: var(--card-bg); padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+        .card { background: var(--card-bg); padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
         
         .stats-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { border-left: 4px solid var(--primary); padding: 1.5rem; background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .stat-card { border-left: 4px solid var(--primary); padding: 1.5rem; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .stat-value { font-size: 1.8rem; font-weight: bold; margin-top: 0.5rem; }
 
         .table-wrapper { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.95rem; }
-        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th, td { padding: 0.85rem; text-align: left; border-bottom: 1px solid var(--border); }
         th { background: #f8fafc; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
         tr:hover { background-color: #f8fafc; }
         
-        .badge { padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+        .badge { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
         .bg-pending { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
         .bg-paid { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
         .bg-partial { background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; }
@@ -112,76 +123,76 @@
 
         .dashboard-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 
-        .receipt-box { border: 2px dashed #ccc; padding: 2rem; max-width: 600px; margin: 0 auto; background: white; }
+        .receipt-box { border: 2px dashed #ccc; padding: 2rem; max-width: 600px; margin: 0 auto; background: white; border-radius: 8px;}
         .receipt-header { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
-        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 1.1rem; }
 
         @media print {
             body * { visibility: hidden; }
             #receiptView, #receiptView * { visibility: visible; }
-            #receiptView { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+            #receiptView { position: absolute; left: 0; top: 0; width: 100%; height: 100%; margin:0; padding:0; border:none;}
             .sidebar, .page-header, .no-print { display: none !important; }
         }
 
-        /* MOBILE FIXES */
+        /* MOBILE FIXES & REFINEMENTS */
         @media (max-width: 768px) {
-            body { height: auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+            body { height: auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; background: #f1f5f9; }
             .app-layout { flex-direction: column; height: auto; min-height: 100vh; }
             .sidebar { width: 100%; height: auto; flex-shrink: 0; display: flex; flex-direction: column; }
+            
             .sidebar-header { padding: 1rem; display: flex; justify-content: space-between; align-items: center; background: var(--primary); }
-            .sidebar-header h2 { font-size: 1.25rem; margin: 0; color: white; }
-            .sidebar-header small { color: #e2e8f0; }
+            .sidebar-header h2 { font-size: 1.3rem; margin: 0; color: white; }
+            .sidebar-header small { color: #e2e8f0; font-size: 0.8rem; }
             
-            .sidebar-footer {
-                padding: 0.75rem 1rem;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 0.5rem;
-                background: #0f172a;
-            }
-            .sidebar-footer .btn { padding: 0.6rem 0.25rem; font-size: 0.75rem; margin: 0 !important; width: 100%; text-align: center; }
-            /* PHASE B: Make Cloud button span full width on mobile */
-            #cloudBackupBtn { grid-column: span 2; }
+            /* Bottom App Navigation matching 5 items */
+            .sidebar-nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: row; background: #ffffff; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); z-index: 1000; border-top: 1px solid var(--border); padding: 0; overflow-x: hidden; }
+            .nav-item { flex: 1; text-align: center; padding: 0.6rem 0.2rem; font-size: 0.75rem; border-left: none; border-top: 3px solid transparent; color: var(--text-muted); white-space: nowrap; }
+            .nav-item.active { border-left: none; border-top-color: var(--primary); background: #eff6ff; color: var(--primary); font-weight: bold; }
             
-            .sidebar-nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: row; background: #ffffff; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000; border-top: 1px solid var(--border); padding: 0; overflow-x: auto; }
-            .nav-item { flex: 1; text-align: center; padding: 0.75rem 0.25rem; font-size: 0.8rem; border-left: none; border-top: 3px solid transparent; color: var(--text-muted); white-space: nowrap; }
-            .nav-item.active { border-left: none; border-top-color: var(--primary); background: #eff6ff; color: var(--primary); font-weight: 600; }
-            .main-content { flex: 1; overflow: visible; padding: 1rem 1rem 5rem 1rem; background: #f1f5f9; }
-            .page-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 1rem; }
-            .page-header h2 { font-size: 1.25rem; }
-            .card { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
-            .card h3 { font-size: 1.1rem; margin-bottom: 1rem; }
+            .main-content { flex: 1; overflow: visible; padding: 1rem 1rem 6rem 1rem; background: transparent; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; }
+            .page-header h2 { font-size: 1.4rem; }
+            
+            .card { padding: 1.25rem; margin-bottom: 1rem; border-radius: 12px; }
+            .card h3 { font-size: 1.15rem; margin-bottom: 1.2rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;}
+            
             .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
-            .stat-card { padding: 1rem; border-left-width: 3px; }
+            .stat-card { padding: 1rem; border-left-width: 4px; border-radius: 10px;}
             .stat-card .text-muted { font-size: 0.75rem; }
-            .stat-value { font-size: 1.25rem; margin-top: 0.25rem; }
+            .stat-value { font-size: 1.4rem; margin-top: 0.35rem; }
+            
             .dashboard-lists { grid-template-columns: 1fr; gap: 1rem; }
-            .form-grid { grid-template-columns: 1fr; gap: 0.75rem; }
-            .form-group { margin-bottom: 0.75rem; }
-            .form-group label { font-size: 0.85rem; }
-            .form-group input, .form-group select { padding: 0.75rem; font-size: 1rem; }
+            
+            /* PERFECT FORM BOX SIZING */
+            .form-grid { grid-template-columns: 1fr; gap: 0; }
+            .form-group { margin-bottom: 1rem; }
+            .form-group input, .form-group select { height: 48px; } /* Ensures all boxes are exactly the same height */
+            #loanCustomerSearch { margin-bottom: 0.5rem; } /* Space between search and dropdown */
             .form-group .flex { flex-direction: column; gap: 0.5rem; }
             .form-group .flex input { width: 100%; }
-            .form-group .flex .btn { width: 100%; justify-content: center; }
-            .btn { padding: 0.75rem 1rem; font-size: 1rem; width: 100%; justify-content: center; }
-            .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.85rem; width: auto; }
+            .form-group .flex .btn { width: 100%; justify-content: center; height: 48px; }
+            .btn { padding: 0.75rem 1rem; font-size: 1rem; width: 100%; justify-content: center; height: 48px;}
+            .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.85rem; width: auto; height: auto;}
 
             .table-wrapper { overflow: visible; }
             table, thead, tbody, th, td, tr { display: block; width: 100%; }
             thead tr { position: absolute; top: -9999px; left: -9999px; }
-            .table-wrapper tr { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-            .table-wrapper td { border: none; padding: 0.25rem 0; text-align: left; font-size: 0.95rem; color: var(--text-main); position: relative; }
-            .table-wrapper td:first-child { font-weight: 700; font-size: 1.1rem; color: var(--primary-dark); border-bottom: 1px solid #f1f5f9; margin-bottom: 0.5rem; padding-bottom: 0.5rem; }
+            .table-wrapper tr { background: #fff; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1rem; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+            .table-wrapper td { border: none; padding: 0.35rem 0; text-align: left; font-size: 0.95rem; color: var(--text-main); position: relative; }
+            .table-wrapper td:first-child { font-weight: 800; font-size: 1.15rem; color: var(--primary-dark); border-bottom: 1px dashed var(--border); margin-bottom: 0.5rem; padding-bottom: 0.5rem; }
             .table-wrapper td:last-child { margin-top: 0.5rem; padding-top: 0.75rem; border-top: 1px dashed var(--border); display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: flex-start; }
             .table-wrapper td:last-child .flex { width: 100%; flex-wrap: wrap; gap: 0.5rem; flex-direction: row; }
-            .table-wrapper td:last-child .btn { flex: 1; min-width: 45%; padding: 0.5rem; font-size: 0.85rem; }
+            .table-wrapper td:last-child .btn { flex: 1; min-width: 45%; padding: 0.6rem; font-size: 0.9rem; }
 
-            #upcomingEmiAlert { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 1rem; }
+            #upcomingEmiAlert { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 1rem; border-radius: 8px;}
             .receipt-box { padding: 1.5rem 1rem; border: 1px solid #ccc; border-radius: 8px; }
-            .receipt-row { flex-direction: column; align-items: flex-start; gap: 0.25rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
+            .receipt-row { flex-direction: column; align-items: flex-start; gap: 0.25rem; border-bottom: 1px dashed #eee; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
             .receipt-row:last-child { border-bottom: none; }
             .receipt-row span { font-size: 0.85rem; color: var(--text-muted); }
-            .receipt-row strong { font-size: 1rem; }
+            .receipt-row strong { font-size: 1.1rem; }
+            
+            /* Specific settings page buttons */
+            #settingsView .btn { margin-bottom: 1rem; }
         }
     </style>
 </head>
@@ -211,19 +222,13 @@
                 <h2>EMI Manager</h2>
                 <small id="userRoleDisplay" class="text-muted"></small>
             </div>
-            <div class="sidebar-footer">
-                <button id="logoutBtn" class="btn btn-danger btn-block">Logout</button>
-                <button id="backupBtn" class="btn btn-secondary btn-block">Download Backup</button>
-                <input type="file" id="restoreFile" accept=".json" class="hidden">
-                <button id="restoreBtn" class="btn btn-secondary btn-block">Restore File</button>
-                
-                <button id="cloudBackupBtn" class="btn btn-primary btn-block" style="background: var(--warning); color: var(--text-main); font-weight: bold; margin-top: 0.5rem;">☁️ Sync to Cloud</button>
-            </div>
+            
             <nav class="sidebar-nav">
-                <div class="nav-item active" data-target="dashboardView">Dashboard</div>
-                <div class="nav-item" data-target="customersView">Customers</div>
+                <div class="nav-item active" data-target="dashboardView">Home</div>
+                <div class="nav-item" data-target="customersView">Clients</div>
                 <div class="nav-item" data-target="loansView">Loans</div>
-                <div class="nav-item" data-target="collectionView">Collect EMI</div>
+                <div class="nav-item" data-target="collectionView">Pay</div>
+                <div class="nav-item" data-target="settingsView">Settings</div>
             </nav>
         </aside>
 
@@ -305,7 +310,7 @@
                 <div id="loanHistoryPanel" class="card hidden">
                     <div class="flex" style="justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h3 class="text-primary">EMI History</h3>
-                        <button class="btn btn-secondary btn-sm" onclick="modules.loans.hideHistory()">Back to Loans</button>
+                        <button class="btn btn-secondary btn-sm" onclick="modules.loans.hideHistory()" style="height: auto;">Back to Loans</button>
                     </div>
                     <p id="historySubtitle" class="mb-4 text-muted font-bold"></p>
                     <div class="table-wrapper">
@@ -322,7 +327,7 @@
                         <form id="loanForm" class="form-grid mt-4">
                             <div class="form-group">
                                 <label>Select Customer</label>
-                                <input type="text" id="loanCustomerSearch" placeholder="Search by Name or Phone..." style="margin-bottom: 0.5rem;" oninput="modules.loans.filterCustomers(this.value)">
+                                <input type="text" id="loanCustomerSearch" placeholder="Search by Name/Phone" oninput="modules.loans.filterCustomers(this.value)">
                                 <select id="loanCustomer" required></select>
                             </div>
                             <div class="form-group">
@@ -355,8 +360,8 @@
                 <div class="card mb-4">
                     <div class="form-group">
                         <label>Search Customer by Name, Phone or Loan No</label>
-                        <div class="flex" style="gap: 1rem;">
-                            <input type="text" id="searchQuery" placeholder="Enter Name, Phone or Loan No" style="flex:1;">
+                        <div class="flex">
+                            <input type="text" id="searchQuery" placeholder="Enter Name, Phone or Loan No">
                             <button id="searchBtn" class="btn btn-primary">Search</button>
                         </div>
                     </div>
@@ -366,8 +371,8 @@
                     <h3 id="payTitle" class="mb-4 text-primary"></h3>
                     
                     <div id="upcomingEmiAlert" class="mb-4 p-4 hidden" style="background: #fff7ed; border-left: 4px solid orange;">
-                        <div style="flex: 1;">
-                            <strong>Next EMI:</strong> <span id="alertDate"></span> | 
+                        <div style="flex: 1; margin-bottom:0.5rem;">
+                            <strong>Next EMI:</strong> <span id="alertDate"></span> <br>
                             <strong>Amount:</strong> <span id="alertAmount"></span>
                         </div>
                         <span id="alertStatus" class="badge"></span>
@@ -388,6 +393,32 @@
                         </div>
                         <button type="submit" class="btn btn-success" style="grid-column: span 2;">Confirm Payment</button>
                     </form>
+                </div>
+            </section>
+
+            <section id="settingsView" class="page hidden">
+                <div class="page-header">
+                    <h2>App Settings</h2>
+                </div>
+                
+                <div class="card">
+                    <h3 class="text-primary mb-4">☁️ Cloud Sync (Phase C)</h3>
+                    <p class="text-muted mb-4" style="font-size: 0.9rem;">Keep your devices connected securely.</p>
+                    <button id="cloudBackupBtn" class="btn btn-block" style="background: #f59e0b; color: #0f172a; margin-bottom: 1rem;">1. Sync Data to Cloud (Upload)</button>
+                    <button id="cloudDownloadBtn" class="btn btn-block" style="background: var(--primary); color: white; margin-bottom: 0;">2. Download from Cloud (Sync Device)</button>
+                </div>
+
+                <div class="card">
+                    <h3 class="text-primary mb-4">📁 Local Device Backup</h3>
+                    <p class="text-muted mb-4" style="font-size: 0.9rem;">Download a physical file to your computer.</p>
+                    <button id="backupBtn" class="btn btn-secondary btn-block">Download Physical Backup File</button>
+                    <input type="file" id="restoreFile" accept=".json" class="hidden">
+                    <button id="restoreBtn" class="btn btn-secondary btn-block" style="background:#cbd5e1; color:#0f172a;">Restore from File</button>
+                </div>
+                
+                <div class="card">
+                    <h3 class="text-danger mb-4">Account</h3>
+                    <button id="logoutBtn" class="btn btn-danger btn-block">Logout of App</button>
                 </div>
             </section>
 
@@ -417,9 +448,9 @@
     </div>
 
     <script>
-        // PHASE B: FIREBASE INITIALIZATION & CONNECTION
+        // FIREBASE INITIALIZATION
         const firebaseConfig = {
-            apiKey: "AIzaSyCXA2cYaoXYF0bgGZc8Lyh8MUJ533rD4r8", // Fixed syntax typos from input
+            apiKey: "AIzaSyCXA2cYaoXYF0bgGZc8Lyh8MUJ533rD4r8", 
             authDomain: "emi-manager-new-ashish.firebaseapp.com",
             projectId: "emi-manager-new-ashish",
             storageBucket: "emi-manager-new-ashish.firebasestorage.app",
@@ -428,7 +459,6 @@
         };
         firebase.initializeApp(firebaseConfig);
         const firestore = firebase.firestore();
-
 
         (function initPWA() {
             const manifestContent = document.getElementById('pwa-manifest').textContent;
@@ -523,7 +553,7 @@
                         modules.loans.render();
                     }
                     
-                    window.scrollTo(0, 0);
+                    window.scrollTo(0, 0); // Smooth snap to top
                 },
                 showMainApp: () => {
                     document.getElementById('loginView').classList.add('hidden');
@@ -554,8 +584,8 @@
                 document.getElementById('restoreBtn').addEventListener('click', () => document.getElementById('restoreFile').click());
                 document.getElementById('restoreFile').addEventListener('change', modules.dataBackup.importData);
                 
-                // PHASE B: Attach Cloud Sync Function
                 document.getElementById('cloudBackupBtn').addEventListener('click', modules.dataBackup.syncToFirebase);
+                document.getElementById('cloudDownloadBtn').addEventListener('click', modules.dataBackup.downloadFromFirebase);
             }
         };
 
@@ -574,32 +604,66 @@
         // --- 3. MODULES ---
         const modules = {
             dataBackup: {
-                // PHASE B: FIREBASE SYNC LOGIC
                 syncToFirebase: async () => {
                     const btn = document.getElementById('cloudBackupBtn');
                     btn.innerText = "⏳ Syncing...";
                     btn.disabled = true;
 
                     try {
-                        // The exact collections we want to copy into Firebase
                         const collections = ['users', 'customers', 'loans', 'emis', 'payments'];
-                        
-                        // Loop over local data and push to Firebase silently
                         for (let col of collections) {
                             const localData = db.get(col);
                             for (let item of localData) {
-                                // .set() creates or safely overwrites the exact copy in the cloud
                                 await firestore.collection(col).doc(item.id).set(item);
                             }
                         }
-                        
-                        alert("✅ Cloud Backup Successful! All your local data is safely stored in Firebase.");
+                        alert("✅ Cloud Backup Successful! Data pushed to Firebase.");
                     } catch (error) {
-                        console.error("Firebase Error: ", error);
-                        alert("❌ Cloud Backup Failed. Check your internet connection or Firebase database rules.");
+                        alert("❌ Cloud Backup Failed. Check internet or rules.");
                     }
 
-                    btn.innerText = "☁️ Sync to Cloud";
+                    btn.innerText = "1. Sync Data to Cloud (Upload)";
+                    btn.disabled = false;
+                },
+
+                // PHASE C: PULL DATA FROM FIREBASE TO LOCAL DEVICE
+                downloadFromFirebase: async () => {
+                    if(!confirm("⚠️ WARNING: This will overwrite your phone's memory with the data from the Cloud. Make sure the Cloud data is up to date. Continue?")) return;
+
+                    const btn = document.getElementById('cloudDownloadBtn');
+                    btn.innerText = "⏳ Downloading...";
+                    btn.disabled = true;
+
+                    try {
+                        const collections = ['users', 'customers', 'loans', 'emis', 'payments'];
+                        let dataFound = false;
+
+                        for (let col of collections) {
+                            const snapshot = await firestore.collection(col).get();
+                            const cloudData = [];
+                            snapshot.forEach(doc => {
+                                cloudData.push(doc.data());
+                            });
+                            
+                            if(cloudData.length > 0) {
+                                db.set(col, cloudData);
+                                dataFound = true;
+                            }
+                        }
+
+                        if(dataFound) {
+                            alert("✅ Cloud Download Successful! Your device is now perfectly synced.");
+                            location.reload(); 
+                        } else {
+                            alert("⚠️ The cloud is currently empty. Nothing was downloaded.");
+                        }
+
+                    } catch (error) {
+                        console.error("Firebase Error: ", error);
+                        alert("❌ Cloud Download Failed. Check internet connection.");
+                    }
+
+                    btn.innerText = "2. Download from Cloud (Sync Device)";
                     btn.disabled = false;
                 },
 
