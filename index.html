@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMI Management System - Phase D (Real-Time)</title>
+    <title>EMI Management System - Secure Mode</title>
     
     <script type="application/json" id="pwa-manifest">
     {
@@ -63,7 +63,7 @@
         .font-bold { font-weight: bold; }
 
         .btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 0.95rem;}
-        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.85rem; }
         .btn-primary { background: var(--primary); }
         .btn-primary:hover { background: var(--primary-dark); }
         .btn-success { background: var(--success); }
@@ -72,6 +72,7 @@
         .btn-secondary:hover { background: #475569; }
         .btn-block { width: 100%; display: flex; }
 
+        /* FORM BOX FIXES */
         .form-group { margin-bottom: 1.2rem; }
         .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
         .form-group input, .form-group select { 
@@ -133,7 +134,7 @@
             .sidebar, .page-header, .no-print { display: none !important; }
         }
 
-        /* MOBILE FIXES & REFINEMENTS */
+        /* MOBILE FIXES */
         @media (max-width: 768px) {
             body { height: auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; background: #f1f5f9; }
             .app-layout { flex-direction: column; height: auto; min-height: 100vh; }
@@ -204,7 +205,7 @@
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="loginPassword" required value="Ashish@12">
+                    <input type="password" id="loginPassword" required placeholder="Enter password manually">
                 </div>
                 <p id="loginError" class="text-danger hidden mb-4 text-center">Invalid credentials</p>
                 <button type="submit" class="btn btn-primary btn-block">Login</button>
@@ -455,7 +456,7 @@
         firebase.initializeApp(firebaseConfig);
         const firestore = firebase.firestore();
 
-        // ENABLE OFFLINE PERSISTENCE (Crucial for Phase D safety)
+        // ENABLE OFFLINE PERSISTENCE 
         firestore.enablePersistence().catch(err => {
             console.log("Offline Persistence Error: ", err);
         });
@@ -502,7 +503,6 @@
             get: (table) => JSON.parse(localStorage.getItem(table)) || [],
             set: (table, data) => localStorage.setItem(table, JSON.stringify(data)),
             
-            // PHASE D: Modified to auto-push to cloud instantly
             insert: (table, record) => {
                 const data = db.get(table);
                 record.id = Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -510,7 +510,6 @@
                 data.push(record);
                 db.set(table, data);
                 
-                // Instantly send to Firebase (Offline safe)
                 if(table !== 'users') {
                     firestore.collection(table).doc(record.id).set(record).catch(e => console.error(e));
                 }
@@ -523,7 +522,6 @@
                     data[idx] = { ...data[idx], ...updates };
                     db.set(table, data);
                     
-                    // Instantly update in Firebase
                     if(table !== 'users') {
                         firestore.collection(table).doc(id).update(updates).catch(e => console.error(e));
                     }
@@ -534,15 +532,12 @@
                 const newData = data.filter(item => item.id !== id);
                 db.set(table, newData);
                 
-                // Instantly delete from Firebase
                 if(table !== 'users') {
                     firestore.collection(table).doc(id).delete().catch(e => console.error(e));
                 }
             }
         };
 
-        // PHASE D: REAL-TIME LISTENERS
-        // This listens to the cloud 24/7. If Device B makes a change, Device A updates locally and re-renders automatically.
         function startRealTimeSync() {
             const collectionsToSync = ['customers', 'loans', 'emis', 'payments'];
             
@@ -551,15 +546,11 @@
                     const cloudData = [];
                     snapshot.forEach(doc => cloudData.push(doc.data()));
                     
-                    // Update Local Storage silently
                     localStorage.setItem(col, JSON.stringify(cloudData));
                     
-                    // Safely re-render visible screens (Prevents interrupting you while typing in search/pay screens)
                     const activeView = document.querySelector('.page:not(.hidden)');
                     if (activeView) {
                         if (activeView.id === 'dashboardView') modules.dashboard.render();
-                        // We only auto-refresh dashboard to prevent typing interruptions. 
-                        // Other tabs will pull fresh data automatically when clicked or searched.
                     }
                 });
             });
@@ -574,7 +565,7 @@
                 if (session) {
                     app.currentUser = JSON.parse(session);
                     app.router.showMainApp();
-                    startRealTimeSync(); // PHASE D: Start listening once logged in
+                    startRealTimeSync(); 
                 }
                 app.bindEvents();
             },
@@ -614,7 +605,6 @@
             bindEvents: () => {
                 document.getElementById('loginForm').addEventListener('submit', (e) => {
                     modules.auth.login(e);
-                    // Start sync when successfully logging in for the first time
                     if (sessionStorage.getItem('session')) {
                         startRealTimeSync();
                     }
@@ -804,7 +794,6 @@
                     const loans = db.get('loans').filter(l => l.customerId === id);
                     const loanIds = loans.map(l => l.id);
 
-                    // Safely delete associated records locally AND in cloud automatically
                     let emis = db.get('emis').filter(e => loanIds.includes(e.loanId));
                     emis.forEach(e => db.delete('emis', e.id));
 
