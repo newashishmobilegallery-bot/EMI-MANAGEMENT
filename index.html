@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMI Management System - Secure Mode</title>
+    <title>EMI Management System - Phase 5</title>
     
     <script type="application/json" id="pwa-manifest">
     {
@@ -28,7 +28,7 @@
 
     <style>
         /* =========================================================
-           CSS STYLES
+           CSS STYLES & MOBILE UI PRESERVED
            ========================================================= */
         :root {
             --primary: #2563eb;
@@ -56,6 +56,8 @@
         .p-4 { padding: 1rem; }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+        .cursor-pointer { cursor: pointer; transition: transform 0.2s; }
+        .cursor-pointer:active { transform: scale(0.98); }
 
         .text-success { color: var(--success); }
         .text-danger { color: var(--danger); }
@@ -63,16 +65,16 @@
         .font-bold { font-weight: bold; }
 
         .btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 0.95rem;}
-        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.85rem; }
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
         .btn-primary { background: var(--primary); }
         .btn-primary:hover { background: var(--primary-dark); }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); color: #0f172a; }
         .btn-secondary { background: var(--text-muted); }
         .btn-secondary:hover { background: #475569; }
         .btn-block { width: 100%; display: flex; }
 
-        /* FORM BOX FIXES */
         .form-group { margin-bottom: 1.2rem; }
         .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
         .form-group input, .form-group select { 
@@ -244,8 +246,8 @@
                         <div class="text-muted">Total Outstanding</div>
                         <div class="stat-value" id="dashOutstanding">₹0</div>
                     </div>
-                    <div class="stat-card" style="border-left-color: var(--danger)">
-                        <div class="text-muted">Overdue EMIs</div>
+                    <div class="stat-card cursor-pointer" style="border-left-color: var(--danger)" onclick="app.router.navigate('overdueView')">
+                        <div class="text-muted flex" style="justify-content: space-between;">Overdue EMIs <span style="font-size: 0.8rem; background: var(--danger); color: white; padding: 0.1rem 0.4rem; border-radius: 4px;">Tap to View</span></div>
                         <div class="stat-value text-danger" id="dashOverdueCount">0</div>
                     </div>
                     <div class="stat-card" style="border-left-color: var(--primary)">
@@ -259,7 +261,7 @@
                         <h3 class="mb-4 text-primary">Upcoming EMIs (Next 7 Days)</h3>
                         <div class="table-wrapper">
                             <table id="upcomingTable">
-                                <thead><tr><th>Name</th><th>Loan</th><th>Due Date</th><th>Amt</th><th>Action</th></tr></thead>
+                                <thead><tr><th>Name</th><th>Phone</th><th>Loan</th><th>Buy Date</th><th>Due Date</th><th>Amt</th><th>Action</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -268,11 +270,24 @@
                         <h3 class="mb-4 text-success">Recent Collections</h3>
                         <div class="table-wrapper">
                             <table id="recentTable">
-                                <thead><tr><th>Date</th><th>Rcpt No</th><th>Amount</th></tr></thead>
+                                <thead><tr><th>Date</th><th>Rcpt No</th><th>Amount</th><th>Action</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <section id="overdueView" class="page hidden">
+                <div class="page-header flex" style="gap: 1rem; align-items: center;">
+                    <button class="btn btn-secondary btn-sm" onclick="app.router.navigate('dashboardView')">Back</button>
+                    <h2>All Overdue EMIs</h2>
+                </div>
+                <div class="card table-wrapper">
+                    <table id="overdueTable">
+                        <thead><tr><th>Name</th><th>Phone</th><th>Loan No</th><th>Due Date</th><th>Amount</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </section>
 
@@ -281,13 +296,14 @@
                     <h2>Customers</h2>
                 </div>
                 <div class="card mb-4">
-                    <h3>Add New Customer</h3>
+                    <h3 id="customerFormTitle">Add New Customer</h3>
                     <form id="customerForm" class="form-grid mt-4">
+                        <input type="hidden" id="editCustomerId">
                         <div class="form-group"><label>Name</label><input type="text" id="custName" required></div>
                         <div class="form-group"><label>Phone</label><input type="text" id="custPhone" required></div>
                         <div class="form-group"><label>Address</label><input type="text" id="custAddress" required></div>
                         <div class="form-group"><label>Finance Company</label><input type="text" id="custFinance" required></div>
-                        <button type="submit" class="btn btn-primary" style="grid-column: span 2;">Save Customer</button>
+                        <button type="submit" id="customerSubmitBtn" class="btn btn-primary" style="grid-column: span 2;">Save Customer</button>
                     </form>
                 </div>
                 <div class="card table-wrapper">
@@ -320,8 +336,9 @@
 
                 <div id="loansMainPanel">
                     <div class="card mb-4 admin-only">
-                        <h3>Create New Loan</h3>
+                        <h3 id="loanFormTitle">Create New Loan</h3>
                         <form id="loanForm" class="form-grid mt-4">
+                            <input type="hidden" id="editLoanId">
                             <div class="form-group">
                                 <label>Select Customer</label>
                                 <input type="text" id="loanCustomerSearch" placeholder="Search by Name/Phone" oninput="modules.loans.filterCustomers(this.value)">
@@ -336,14 +353,14 @@
                             <div class="form-group"><label>EMI Amount (₹)</label><input type="number" id="loanEmi" required></div>
                             <div class="form-group"><label>Total Months</label><input type="number" id="loanMonths" required></div>
                             <div class="form-group"><label>First EMI Date</label><input type="date" id="loanDate" required></div>
-                            <div class="form-group"><label>Final Submission Date (Shop Deadline)</label><input type="date" id="loanShopDate" required></div>
-                            <button type="submit" class="btn btn-primary" style="grid-column: span 2;">Generate Loan & Schedule</button>
+                            <div class="form-group"><label>Buying Date</label><input type="date" id="loanBuyingDate" required></div>
+                            <button type="submit" id="loanSubmitBtn" class="btn btn-primary" style="grid-column: span 2;">Generate Loan & Schedule</button>
                         </form>
                     </div>
                     <div class="card table-wrapper">
                         <h3>Active Loans</h3>
                         <table id="loanTable">
-                            <thead><tr><th>Loan No</th><th>Customer</th><th>Total</th><th>Next EMI Date</th><th>Amt</th><th>Status</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Loan No</th><th>Customer</th><th>Buy Date</th><th>Total</th><th>Next EMI Date</th><th>Amt</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>
@@ -365,7 +382,8 @@
                 </div>
 
                 <div id="paymentPanel" class="card hidden">
-                    <h3 id="payTitle" class="mb-4 text-primary"></h3>
+                    <h3 id="payTitle" class="mb-2 text-primary"></h3>
+                    <p id="payPhone" class="text-muted mb-4 font-bold"></p> 
                     
                     <div id="upcomingEmiAlert" class="mb-4 p-4 hidden" style="background: #fff7ed; border-left: 4px solid orange;">
                         <div style="flex: 1; margin-bottom:0.5rem;">
@@ -435,7 +453,7 @@
                     
                     <div class="mt-4 pt-4 text-center no-print flex" style="gap: 1rem; flex-direction: column;">
                         <button onclick="window.print()" class="btn btn-primary">Print Receipt</button>
-                        <button onclick="app.router.navigate('collectionView')" class="btn btn-secondary">Collect Another</button>
+                        <button onclick="app.router.navigate('collectionView')" class="btn btn-secondary">Go to Payments</button>
                     </div>
                 </div>
             </section>
@@ -579,8 +597,20 @@
                     if(navItem) navItem.classList.add('active');
 
                     if (viewId === 'dashboardView') modules.dashboard.render();
-                    if (viewId === 'customersView') modules.customers.render();
+                    if (viewId === 'customersView') {
+                        // Reset forms when navigating back
+                        document.getElementById('customerForm').reset();
+                        document.getElementById('editCustomerId').value = '';
+                        document.getElementById('customerSubmitBtn').innerText = "Save Customer";
+                        document.getElementById('customerFormTitle').innerText = "Add New Customer";
+                        modules.customers.render();
+                    }
                     if (viewId === 'loansView') {
+                        document.getElementById('loanForm').reset();
+                        document.getElementById('editLoanId').value = '';
+                        document.getElementById('loanSubmitBtn').innerText = "Generate Loan & Schedule";
+                        document.getElementById('loanFormTitle').innerText = "Create New Loan";
+                        
                         document.getElementById('loansMainPanel').classList.remove('hidden');
                         document.getElementById('loanHistoryPanel').classList.add('hidden');
                         modules.loans.render();
@@ -715,6 +745,7 @@
                     let nextWeek = new Date(today); nextWeek.setDate(nextWeek.getDate() + 7);
 
                     const upcomingList = [];
+                    const overdueList = []; // PHASE 5 FIX: Track overdue list for the clickable view
 
                     emis.forEach(emi => {
                         if (emi.status !== 'Paid') {
@@ -725,11 +756,13 @@
                             let due = new Date(emi.dueDate);
                             due.setHours(0,0,0,0);
                             
+                            let loan = loans.find(l => l.id === emi.loanId);
+                            let cust = loan ? customers.find(c => c.id === loan.customerId) : null;
+                            
                             if (due >= today && due <= nextWeek) {
-                                let loan = loans.find(l => l.id === emi.loanId);
-                                let cust = loan ? customers.find(c => c.id === loan.customerId) : null;
                                 if(loan && cust) {
-                                    upcomingList.push({ name: cust.name, loanNo: loan.loanNo, date: emi.dueDate, amount: dueAmt });
+                                    // PHASE 5 FIX: Pass phone and buying date
+                                    upcomingList.push({ name: cust.name, phone: cust.phone, loanNo: loan.loanNo, buyDate: loan.buyingDate, date: emi.dueDate, amount: dueAmt });
                                 }
                             }
 
@@ -737,6 +770,9 @@
                                 overdue++;
                                 if(emi.status !== 'Overdue' && emi.status !== 'Partially Paid') {
                                     db.update('emis', emi.id, {status: 'Overdue'});
+                                }
+                                if(loan && cust) {
+                                    overdueList.push({ name: cust.name, phone: cust.phone, loanNo: loan.loanNo, date: emi.dueDate, amount: dueAmt });
                                 }
                             }
                         }
@@ -748,21 +784,42 @@
                     document.getElementById('dashTotalDue').innerText = utils.formatMoney(totalDue);
 
                     const upTable = document.querySelector('#upcomingTable tbody');
+                    // PHASE 5 FIX: Render phone and buying date
                     upTable.innerHTML = upcomingList.length ? upcomingList.map(u => 
                         `<tr>
                             <td>${u.name}</td>
+                            <td>${u.phone}</td>
                             <td>${u.loanNo}</td>
+                            <td>${u.buyDate ? utils.formatDate(u.buyDate) : '-'}</td>
                             <td>${utils.formatDate(u.date)}</td>
                             <td>${utils.formatMoney(u.amount)}</td>
                             <td><button class="btn btn-sm btn-primary" onclick="modules.collection.directPay('${u.loanNo}')">Pay</button></td>
                         </tr>`
-                    ).join('') : '<tr><td colspan="5" class="text-center">No upcoming EMIs</td></tr>';
+                    ).join('') : '<tr><td colspan="7" class="text-center">No upcoming EMIs</td></tr>';
 
                     const recentTable = document.querySelector('#recentTable tbody');
                     const sortedPayments = [...payments].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
                     recentTable.innerHTML = sortedPayments.map(p => 
-                        `<tr><td>${utils.formatDate(p.createdAt)}</td><td>${p.receiptNo}</td><td class="text-success font-bold">${utils.formatMoney(p.amount)}</td></tr>`
+                        `<tr>
+                            <td>${utils.formatDate(p.createdAt)}</td>
+                            <td>${p.receiptNo}</td>
+                            <td class="text-success font-bold">${utils.formatMoney(p.amount)}</td>
+                            <td><button class="btn btn-sm btn-secondary" onclick="modules.collection.reprint('${p.receiptNo}')">Bill</button></td>
+                        </tr>`
                     ).join('');
+
+                    // PHASE 5 FIX: Render Full Overdue List
+                    const overdueTbody = document.querySelector('#overdueTable tbody');
+                    overdueTbody.innerHTML = overdueList.length ? overdueList.map(o => 
+                        `<tr>
+                            <td>${o.name}</td>
+                            <td>${o.phone}</td>
+                            <td>${o.loanNo}</td>
+                            <td>${utils.formatDate(o.date)}</td>
+                            <td class="text-danger font-bold">${utils.formatMoney(o.amount)}</td>
+                            <td><button class="btn btn-sm btn-primary" onclick="modules.collection.directPay('${o.loanNo}')">Pay</button></td>
+                        </tr>`
+                    ).join('') : '<tr><td colspan="6" class="text-center">No overdue EMIs found.</td></tr>';
                 }
             },
 
@@ -772,21 +829,54 @@
                     tbody.innerHTML = db.get('customers').map(c => 
                         `<tr>
                             <td>${c.name}</td><td>${c.phone}</td><td>${c.financeCompany || c.idProof || 'N/A'}</td><td>${c.address}</td>
-                            <td><button class="btn btn-sm btn-danger" onclick="modules.customers.delete('${c.id}')">Delete</button></td>
+                            <td>
+                                <div class="flex" style="gap: 0.5rem;">
+                                    <button class="btn btn-sm btn-warning" onclick="modules.customers.edit('${c.id}')">Edit</button>
+                                    <button class="btn btn-sm btn-danger" onclick="modules.customers.delete('${c.id}')">Delete</button>
+                                </div>
+                            </td>
                         </tr>`
                     ).join('');
                 },
                 add: (e) => {
                     e.preventDefault();
-                    db.insert('customers', {
+                    
+                    const editId = document.getElementById('editCustomerId').value;
+                    const custData = {
                         name: document.getElementById('custName').value,
                         phone: document.getElementById('custPhone').value,
                         address: document.getElementById('custAddress').value,
                         financeCompany: document.getElementById('custFinance').value
-                    });
+                    };
+
+                    // PHASE 5 FIX: Edit Customer Logic
+                    if(editId) {
+                        db.update('customers', editId, custData);
+                        alert('Customer Updated! Synced securely.');
+                        document.getElementById('editCustomerId').value = '';
+                        document.getElementById('customerSubmitBtn').innerText = "Save Customer";
+                        document.getElementById('customerFormTitle').innerText = "Add New Customer";
+                    } else {
+                        db.insert('customers', custData);
+                        alert('Customer Added! Synced securely.');
+                    }
+                    
                     e.target.reset();
                     modules.customers.render();
-                    alert('Customer Added! Synced securely.');
+                },
+                // PHASE 5 FIX: Load Customer Data to Form
+                edit: (id) => {
+                    const cust = db.get('customers').find(c => c.id === id);
+                    if(!cust) return;
+                    document.getElementById('editCustomerId').value = cust.id;
+                    document.getElementById('custName').value = cust.name;
+                    document.getElementById('custPhone').value = cust.phone;
+                    document.getElementById('custAddress').value = cust.address;
+                    document.getElementById('custFinance').value = cust.financeCompany || '';
+                    
+                    document.getElementById('customerSubmitBtn').innerText = "Update Customer";
+                    document.getElementById('customerFormTitle').innerText = "Edit Customer Details";
+                    window.scrollTo(0, 0);
                 },
                 delete: (id) => {
                     if(!confirm("WARNING: Deleting this customer will delete ALL their Loans, EMIs, and Payments globally. Continue?")) return;
@@ -839,6 +929,7 @@
                         return `<tr>
                             <td>${l.loanNo}</td>
                             <td>${c ? c.name : 'N/A'}</td>
+                            <td>${l.buyingDate ? utils.formatDate(l.buyingDate) : '-'}</td>
                             <td>${utils.formatMoney(l.total)}</td>
                             <td>${nextDate}</td>
                             <td>${nextAmt}</td>
@@ -846,6 +937,7 @@
                             <td>
                                 <div class="flex" style="gap: 0.5rem;">
                                     <button class="btn btn-sm btn-success" onclick="modules.loans.showHistory('${l.id}')">EMIs</button>
+                                    <button class="btn btn-sm btn-warning" onclick="modules.loans.edit('${l.id}')">Edit</button>
                                     <button class="btn btn-sm btn-danger" onclick="modules.loans.delete('${l.id}')">Delete</button>
                                 </div>
                             </td>
@@ -854,39 +946,108 @@
                 },
                 add: (e) => {
                     e.preventDefault();
+                    
+                    const editId = document.getElementById('editLoanId').value;
                     const loanNo = document.getElementById('loanNoInput').value.trim();
-                    if(db.get('loans').some(l => l.loanNo === loanNo)) return alert('Error: Loan Number already exists!');
-
                     const months = parseInt(document.getElementById('loanMonths').value);
                     const emiAmt = parseFloat(document.getElementById('loanEmi').value);
                     const startDate = new Date(document.getElementById('loanDate').value);
-                    const shopDeadline = document.getElementById('loanShopDate').value;
+                    const buyingDate = document.getElementById('loanBuyingDate').value;
+                    const customerId = document.getElementById('loanCustomer').value;
+                    const product = document.getElementById('loanProduct').value;
+                    const total = parseFloat(document.getElementById('loanTotal').value);
 
-                    const loan = db.insert('loans', {
+                    // Duplicate check (ignore if editing same loan)
+                    const isDuplicate = db.get('loans').some(l => l.loanNo === loanNo && l.id !== editId);
+                    if(isDuplicate) return alert('Error: Loan Number already exists!');
+
+                    const loanData = {
                         loanNo: loanNo,
-                        customerId: document.getElementById('loanCustomer').value,
-                        product: document.getElementById('loanProduct').value,
-                        total: parseFloat(document.getElementById('loanTotal').value),
-                        shopDeadline: shopDeadline, 
+                        customerId: customerId,
+                        product: product,
+                        total: total,
+                        buyingDate: buyingDate, 
                         status: 'Active'
-                    });
+                    };
 
-                    for (let i = 1; i <= months; i++) {
-                        let nextDate = new Date(startDate.getFullYear(), startDate.getMonth() + i - 1, startDate.getDate());
-                        db.insert('emis', {
-                            loanId: loan.id,
-                            instNo: i,
-                            dueDate: nextDate.toISOString().split('T')[0],
-                            amount: emiAmt,
-                            paid: 0,
-                            status: 'Pending',
-                            paymentSource: 'SHOP'
-                        });
+                    // PHASE 5 FIX: Edit Loan & Recreate Schedule
+                    if(editId) {
+                        // 1. Delete old schedule
+                        let oldEmis = db.get('emis').filter(e => e.loanId === editId);
+                        oldEmis.forEach(e => db.delete('emis', e.id));
+                        
+                        // 2. Update Loan
+                        db.update('loans', editId, loanData);
+                        
+                        // 3. Create new schedule
+                        for (let i = 1; i <= months; i++) {
+                            let nextDate = new Date(startDate.getFullYear(), startDate.getMonth() + i - 1, startDate.getDate());
+                            db.insert('emis', {
+                                loanId: editId,
+                                instNo: i,
+                                dueDate: nextDate.toISOString().split('T')[0],
+                                amount: emiAmt,
+                                paid: 0,
+                                status: 'Pending',
+                                paymentSource: 'SHOP'
+                            });
+                        }
+                        
+                        document.getElementById('editLoanId').value = '';
+                        document.getElementById('loanSubmitBtn').innerText = "Generate Loan & Schedule";
+                        document.getElementById('loanFormTitle').innerText = "Create New Loan";
+                        alert('Loan Updated & Schedule Recreated!');
+                    } else {
+                        const loan = db.insert('loans', loanData);
+                        for (let i = 1; i <= months; i++) {
+                            let nextDate = new Date(startDate.getFullYear(), startDate.getMonth() + i - 1, startDate.getDate());
+                            db.insert('emis', {
+                                loanId: loan.id,
+                                instNo: i,
+                                dueDate: nextDate.toISOString().split('T')[0],
+                                amount: emiAmt,
+                                paid: 0,
+                                status: 'Pending',
+                                paymentSource: 'SHOP'
+                            });
+                        }
+                        alert('Loan Created and Synced Successfully!');
                     }
                     
                     e.target.reset();
                     modules.loans.render();
-                    alert('Loan Created and Synced Successfully!');
+                },
+                // PHASE 5 FIX: Load Loan to Form
+                edit: (id) => {
+                    const loan = db.get('loans').find(l => l.id === id);
+                    if(!loan) return;
+                    
+                    // Safety Guard: Don't allow recreation if payments exist
+                    const paidEmis = db.get('emis').filter(e => e.loanId === id && (e.status === 'Paid' || e.status === 'Partially Paid'));
+                    if(paidEmis.length > 0) {
+                        alert("⚠️ Cannot edit a loan that already has completed payments. Revert/Undo the payments in the History tab first, or delete the loan entirely.");
+                        return;
+                    }
+                    
+                    document.getElementById('editLoanId').value = loan.id;
+                    document.getElementById('loanCustomer').value = loan.customerId;
+                    document.getElementById('loanNoInput').value = loan.loanNo;
+                    document.getElementById('loanProduct').value = loan.product;
+                    document.getElementById('loanTotal').value = loan.total;
+                    document.getElementById('loanBuyingDate').value = loan.buyingDate || loan.shopDeadline || '';
+                    
+                    // Guess EMIs (rough estimation for form fill)
+                    const emis = db.get('emis').filter(e => e.loanId === id);
+                    if(emis.length > 0) {
+                        emis.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+                        document.getElementById('loanMonths').value = emis.length;
+                        document.getElementById('loanEmi').value = emis[0].amount;
+                        document.getElementById('loanDate').value = emis[0].dueDate;
+                    }
+
+                    document.getElementById('loanSubmitBtn').innerText = "Update Loan & Recreate Schedule";
+                    document.getElementById('loanFormTitle').innerText = "Edit Loan Details";
+                    window.scrollTo(0, 0);
                 },
                 delete: (id) => {
                     if(!confirm("Delete this Loan? All related EMI schedule and Payment history will be deleted globally.")) return;
@@ -899,6 +1060,22 @@
                     
                     db.delete('loans', id);
                     modules.loans.render();
+                },
+                // PHASE 5 FIX: Undo Payment Logic
+                undoPayment: (receiptNo, loanId) => {
+                    if(!confirm("Are you sure you want to REVERT this payment? This will delete the receipt and mark the EMIs as unpaid.")) return;
+                    
+                    const payment = db.get('payments').find(p => p.receiptNo === receiptNo);
+                    if(payment) db.delete('payments', payment.id);
+
+                    const emis = db.get('emis').filter(e => e.receiptNo === receiptNo);
+                    emis.forEach(e => {
+                        let status = utils.checkOverdue(e.dueDate) ? 'Overdue' : 'Pending';
+                        db.update('emis', e.id, { paid: 0, status: status, receiptNo: null, paidDate: null });
+                    });
+
+                    alert("Payment reverted successfully! Cloud synced.");
+                    modules.loans.showHistory(loanId);
                 },
                 showHistory: (loanId) => {
                     document.getElementById('loansMainPanel').classList.add('hidden');
@@ -923,6 +1100,12 @@
                         let submissionDate = e.paidDate ? utils.formatDate(e.paidDate) : '-';
                         let sourceIcon = e.paymentSource === 'ACCOUNT' ? '🏦 ACCOUNT' : '🏪 SHOP';
 
+                        // PHASE 5 FIX: Undo button for paid EMIs
+                        let undoBtn = '';
+                        if (e.receiptNo) {
+                            undoBtn = `<button class="btn btn-sm btn-danger" style="margin-left:8px; padding:0.15rem 0.4rem;" onclick="modules.loans.undoPayment('${e.receiptNo}', '${loanId}')">Undo</button>`;
+                        }
+
                         return `<tr>
                             <td>${e.instNo}</td>
                             <td>${utils.formatDate(e.dueDate)}</td>
@@ -930,7 +1113,7 @@
                             <td><span class="badge ${badge}">${e.status}</span></td>
                             <td class="text-muted" style="font-size: 0.8rem;">${sourceIcon}</td>
                             <td class="text-muted font-bold">${submissionDate}</td>
-                            <td class="text-muted">${e.receiptNo || '-'}</td>
+                            <td class="text-muted">${e.receiptNo || '-'}${undoBtn}</td>
                         </tr>`;
                     }).join('');
                     
@@ -943,6 +1126,25 @@
             },
 
             collection: {
+                // PHASE 5 FIX: Reprint Bill logic
+                reprint: (receiptNo) => {
+                    const payment = db.get('payments').find(p => p.receiptNo === receiptNo);
+                    if(!payment) return alert("Receipt not found!");
+                    
+                    const loan = db.get('loans').find(l => l.id === payment.loanId);
+                    const cust = db.get('customers').find(c => c.id === loan.customerId);
+                    const emi = db.get('emis').find(e => e.receiptNo === receiptNo);
+
+                    document.getElementById('rctNo').innerText = receiptNo;
+                    document.getElementById('rctDate').innerText = new Date(payment.createdAt).toLocaleString();
+                    document.getElementById('rctName').innerText = cust.name;
+                    document.getElementById('rctLoan').innerText = loan.loanNo;
+                    document.getElementById('rctAmount').innerText = payment.amount;
+                    document.getElementById('rctMode').innerText = payment.mode;
+                    document.getElementById('rctSource').innerText = emi && emi.paymentSource === 'ACCOUNT' ? '🏦 ACCOUNT' : '🏪 SHOP';
+
+                    app.router.navigate('receiptView');
+                },
                 toggleSource: (e, id) => {
                     e.preventDefault();
                     const emis = db.get('emis');
@@ -980,6 +1182,8 @@
                     if (!targetLoan || !targetCust) return alert('Active loan not found. Check Name, Phone, or Loan No.');
 
                     document.getElementById('payTitle').innerText = `${targetCust.name} - ${targetLoan.loanNo} (${targetLoan.product})`;
+                    // PHASE 5 FIX: Show Mobile Number in Collect EMI
+                    document.getElementById('payPhone').innerText = `Mobile: ${targetCust.phone}`;
                     document.getElementById('payLoanId').value = targetLoan.id;
                     
                     const allEmis = db.get('emis').filter(e => e.loanId === targetLoan.id);
